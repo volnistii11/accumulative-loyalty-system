@@ -35,7 +35,7 @@ func (cfg *Config) Parse() error {
 		return errors.Wrap(err, "Config.parse")
 	}
 
-	flag.StringVar(&cfg.StorageDSN, "d", defaultValues.StorageDSN, "database URI")
+	flag.StringVar(&cfg.StorageDSN, "d", defaultValues.StorageDSN, "storage URI")
 	flag.StringVar(&cfg.HTTPServerAddress, "a", defaultValues.HTTPServerAddress, "http server address")
 	flag.StringVar(&cfg.AccrualSystemAddress, "r", defaultValues.AccrualSystemAddress, "accrual system address")
 	flag.Parse()
