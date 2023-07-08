@@ -1,0 +1,3 @@
+storage_dsn: "postgres://pguser:pgpwd4habr@localhost:5432/gophermart"
+http_server_address: "localhost:8080"
+accrual_system_address: "https://ya.ru/"
