@@ -1,6 +1,6 @@
 new:
-	migrate create -dir ./internal/gophermart/storage/migrations -ext .sql -seq -digits 5 init
+	migrate create -dir ./migrations -ext .sql -seq -digits 5 init
 clean_mg:
-	rm -rf ./internal/gophermart/storage/migrations
+	rm -rf ./migrations
 clean_db:
 	rm -rf ./db

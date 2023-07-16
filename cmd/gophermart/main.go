@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/volnistii11/accumulative-loyalty-system/internal/gophermart/config"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/gophermart/storage"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/gophermart/storage/postgre"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/storage"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/storage/postgres"
 	"golang.org/x/exp/slog"
 	"log"
 	"os"
@@ -25,15 +26,15 @@ func main() {
 
 	db, err := storage.NewConnection("pgx", cfg.GetStorageDSN())
 	if err != nil {
-		logger.Error("failed to create database connection", err)
+		logger.Error("failed to create database connection", sl.Err(err))
 		os.Exit(1)
 	}
 	defer db.Close()
 	logger.Info("db connection created")
 
-	err = postgre.RunMigrations(cfg.GetStorageDSN())
+	err = postgres.RunMigrations(cfg.GetStorageDSN())
 	if err != nil {
-		logger.Error("failed to run migrations", err)
+		logger.Error("failed to run migrations", sl.Err(err))
 		os.Exit(1)
 	}
 	logger.Info("migrations started")
