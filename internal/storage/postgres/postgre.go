@@ -9,7 +9,7 @@ import (
 )
 
 func RunMigrations(dsn string) error {
-	const migrationsPath = "./internal/gophermart/storage/migrations"
+	const migrationsPath = "./migrations"
 
 	m, err := migrate.New(fmt.Sprintf("file://%s", migrationsPath), dsn)
 	if err != nil {
