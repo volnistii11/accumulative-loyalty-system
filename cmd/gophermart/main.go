@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/storage"
@@ -39,8 +41,12 @@ func main() {
 	}
 	logger.Info("migrations started")
 
-	// TODO: init router: chi, render
-
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
+	
 	// TODO: run server
 
 	// TODO: swagger
