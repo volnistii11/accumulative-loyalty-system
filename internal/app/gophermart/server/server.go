@@ -1,22 +1,39 @@
-package router
+package server
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jmoiron/sqlx"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/api/accumulation"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/api/auth"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
+	"golang.org/x/exp/slog"
 )
 
 type Router struct {
 	httpServer *chi.Mux
+	logger     *slog.Logger
+	db         *sqlx.DB
+	cfg        *config.ParserGetter
 }
 
-func NewRouter() *Router {
-	return &Router{}
+func NewRouter(logger *slog.Logger, db *sqlx.DB, cfg *config.ParserGetter) *Router {
+	return &Router{
+		httpServer: chi.NewRouter(),
+		logger:     logger,
+		db:         db,
+		cfg:        cfg,
+	}
 }
 
 func (r *Router) Serve() *chi.Mux {
 	apiAuth := auth.NewAuth()
 	apiAccumulation := accumulation.NewAccumulation()
+
+	r.httpServer.Use(middleware.RequestID)
+	r.httpServer.Use(middleware.Logger)
+	r.httpServer.Use(middleware.Recoverer)
+	r.httpServer.Use(middleware.URLFormat)
 
 	r.httpServer.Post("/api/user/register", apiAuth.RegisterUser())
 	r.httpServer.Post("/api/user/login", apiAuth.AuthenticateUser())

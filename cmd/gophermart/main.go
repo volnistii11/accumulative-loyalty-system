@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/server"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/storage"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/storage/postgres"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/storage/database"
 	"golang.org/x/exp/slog"
 	"log"
+	"net/http"
 	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -34,19 +34,16 @@ func main() {
 	defer db.Close()
 	logger.Info("db connection created")
 
-	err = postgres.RunMigrations(cfg.GetStorageDSN())
+	err = database.RunMigrations(cfg.GetStorageDSN())
 	if err != nil {
 		logger.Error("failed to run migrations", sl.Err(err))
 		os.Exit(1)
 	}
 	logger.Info("migrations started")
 
-	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.URLFormat)
-	
+	router := server.NewRouter(logger, db, &cfg).Serve()
+	http.ListenAndServe(cfg.GetHTTPServerAddress(), router)
+
 	// TODO: run server
 
 	// TODO: swagger

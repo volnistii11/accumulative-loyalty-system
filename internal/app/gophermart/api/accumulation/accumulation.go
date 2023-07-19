@@ -13,7 +13,7 @@ func NewAccumulation() *Accumulation {
 
 func (a *Accumulation) PutOrder() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: put in order into database with postgres.PutOrder
+		// TODO: put in order into database with database.PutOrder
 	}
 }
 
