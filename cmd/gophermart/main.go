@@ -4,8 +4,7 @@ import (
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/server"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/storage"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/storage/database"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/repository/database"
 	"golang.org/x/exp/slog"
 	"log"
 	"net/http"
@@ -26,12 +25,15 @@ func main() {
 	)
 	logger.Info("init cfg and logger completed")
 
-	db, err := storage.NewConnection("pgx", cfg.GetStorageDSN())
+	conn, err := database.NewConnection("pgx", cfg.GetStorageDSN())
 	if err != nil {
 		logger.Error("failed to create database connection", sl.Err(err))
 		os.Exit(1)
 	}
-	defer db.Close()
+	defer func() {
+		dbInstance, _ := conn.DB()
+		_ = dbInstance.Close()
+	}()
 	logger.Info("db connection created")
 
 	err = database.RunMigrations(cfg.GetStorageDSN())
@@ -41,7 +43,9 @@ func main() {
 	}
 	logger.Info("migrations started")
 
-	router := server.NewRouter(logger, db, &cfg).Serve()
+	storage := database.NewStorage(conn)
+
+	router := server.NewRouter(logger, storage, &cfg).Serve()
 	http.ListenAndServe(cfg.GetHTTPServerAddress(), router)
 
 	// TODO: run server

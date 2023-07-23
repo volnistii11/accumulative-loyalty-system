@@ -1,4 +1,4 @@
-package accumulation
+package api
 
 import (
 	"net/http"

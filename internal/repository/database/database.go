@@ -5,22 +5,22 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
+	"gorm.io/gorm"
 )
 
-type storage struct {
-	db *sqlx.DB
+type Storage struct {
+	db *gorm.DB
 }
 
-func NewStorage(db *sqlx.DB) *storage {
-	return &storage{
+func NewStorage(db *gorm.DB) *Storage {
+	return &Storage{
 		db: db,
 	}
 }
 
-func (s *storage) RegisterUser(login string, pass string) error {
+func (s *Storage) RegisterUser(login string, pass string) error {
 	var (
 		err error
 	)
@@ -28,7 +28,7 @@ func (s *storage) RegisterUser(login string, pass string) error {
 	return err
 }
 
-func (s *storage) AuthenticateUser(login string, pass string) error {
+func (s *Storage) AuthenticateUser(login string, pass string) error {
 	var (
 		err error
 	)
@@ -36,7 +36,7 @@ func (s *storage) AuthenticateUser(login string, pass string) error {
 	return err
 }
 
-func (s *storage) PutOrder(orderNumber string) error {
+func (s *Storage) PutOrder(orderNumber string) error {
 	var (
 		err error
 	)
@@ -44,7 +44,7 @@ func (s *storage) PutOrder(orderNumber string) error {
 	return err
 }
 
-func (s *storage) GetAllOrders(userID string) (*model.Accumulations, error) {
+func (s *Storage) GetAllOrders(userID string) (*model.Accumulations, error) {
 	var (
 		accumulations *model.Accumulations
 		err           error
@@ -53,7 +53,7 @@ func (s *storage) GetAllOrders(userID string) (*model.Accumulations, error) {
 	return accumulations, err
 }
 
-func (s *storage) GetUserBalance(userID string) (float64, float64, error) {
+func (s *Storage) GetUserBalance(userID string) (float64, float64, error) {
 	var (
 		currentBalance   float64
 		withdrawnBalance float64
@@ -63,7 +63,7 @@ func (s *storage) GetUserBalance(userID string) (float64, float64, error) {
 	return currentBalance, withdrawnBalance, err
 }
 
-func (s *storage) Withdraw(orderNumber int, amount int) error {
+func (s *Storage) Withdraw(orderNumber int, amount int) error {
 	var (
 		err error
 	)
@@ -71,7 +71,7 @@ func (s *storage) Withdraw(orderNumber int, amount int) error {
 	return err
 }
 
-func (s *storage) GetAllUserWithdrawals(userID int) (*model.Withdrawals, error) {
+func (s *Storage) GetAllUserWithdrawals(userID int) (*model.Withdrawals, error) {
 	var (
 		withdrawals *model.Withdrawals
 		err         error
