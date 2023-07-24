@@ -20,20 +20,16 @@ func NewStorage(db *gorm.DB) *Storage {
 	}
 }
 
-func (s *Storage) RegisterUser(login string, pass string) error {
-	var (
-		err error
-	)
-	// TODO: register user with some ORM
-	return err
+func (s *Storage) RegisterUser(user *model.User) error {
+	if result := s.db.Create(&user); result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
-func (s *Storage) AuthenticateUser(login string, pass string) error {
-	var (
-		err error
-	)
-	// TODO: authenticate user with some ORM
-	return err
+func (s *Storage) GetUser(user *model.User) *model.User {
+	s.db.Where(&user).Find(&user)
+	return user
 }
 
 func (s *Storage) PutOrder(orderNumber string) error {
