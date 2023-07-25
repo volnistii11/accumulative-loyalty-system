@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
+	"math"
 	"time"
 )
 
@@ -35,6 +36,16 @@ type AllOrdersGetter interface {
 func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) *model.Accumulations {
 	orders := db.GetAllOrders(userID)
 	return orders
+}
+
+type UserBalanceGetter interface {
+	GetUserBalance(userID int) *model.Balance
+}
+
+func (accum *Accumulation) GetUserBalance(userID int, db UserBalanceGetter) *model.Balance {
+	balance := db.GetUserBalance(userID)
+	balance.Withdrawn = math.Abs(balance.Withdrawn)
+	return balance
 }
 
 type OrderChecker interface {

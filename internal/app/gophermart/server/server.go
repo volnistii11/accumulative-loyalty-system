@@ -46,7 +46,7 @@ func (router *Router) Serve() *chi.Mux {
 			r.Use(auth.ParseToken(router.logger))
 			r.Post("/api/user/orders", apiAccumulation.PutOrder(router.logger, router.storage))
 			r.Get("/api/user/orders", apiAccumulation.GetAllOrders(router.logger, router.storage))
-			r.Get("/api/user/balance", apiAccumulation.GetUserBalance())
+			r.Get("/api/user/balance", apiAccumulation.GetUserBalance(router.logger, router.storage))
 			r.Post("/api/user/balance/withdraw", apiAccumulation.DoWithdraw())
 			r.Get("/api/user/withdrawals", apiAccumulation.GetAllUserWithdrawls())
 		})

@@ -15,6 +15,11 @@ type Accumulation struct {
 
 type Accumulations []*Accumulation
 
+type Balance struct {
+	Current   float64 `json:"current"`
+	Withdrawn float64 `json:"withdrawn"`
+}
+
 type Withdrawal struct {
 	OrderNumber int
 	Amount      float64

@@ -45,14 +45,11 @@ func (s *Storage) GetAllOrders(userID int) *model.Accumulations {
 	return &orders
 }
 
-func (s *Storage) GetUserBalance(userID string) (float64, float64, error) {
-	var (
-		currentBalance   float64
-		withdrawnBalance float64
-		err              error
-	)
-	// TODO: get user balance by userID
-	return currentBalance, withdrawnBalance, err
+func (s *Storage) GetUserBalance(userID int) *model.Balance {
+	var balance model.Balance
+	s.db.Table("accumulations").Select("SUM(amount) as current").Where("user_id = ? AND amount > 0", userID).Find(&balance)
+	s.db.Table("accumulations").Select("SUM(amount) as withdrawn").Where("user_id = ? AND amount < 0", userID).Find(&balance)
+	return &balance
 }
 
 func (s *Storage) Withdraw(orderNumber int, amount int) error {

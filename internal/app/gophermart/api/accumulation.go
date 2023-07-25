@@ -103,14 +103,32 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 		userID := r.Context().Value("user_id").(int)
 		orders := a.accumulationService.GetAllOrders(userID, storage)
 
+		if len(*orders) == 0 {
+			logger.Info("user have not order numbers")
+			w.WriteHeader(http.StatusNoContent)
+			render.JSON(w, r, "user have not order numbers")
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, orders)
 	}
 }
 
-func (a *Accumulation) GetUserBalance() http.HandlerFunc {
+func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO:
+		const destination = "api.accumulation.GetUserBalance"
+
+		logger = logger.With(
+			slog.String("destination", destination),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+
+		userID := r.Context().Value("user_id").(int)
+		balance := a.accumulationService.GetUserBalance(userID, storage)
+
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, balance)
 	}
 }
 
