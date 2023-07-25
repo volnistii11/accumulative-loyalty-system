@@ -91,9 +91,20 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 	}
 }
 
-func (a *Accumulation) GetAllOrders() http.HandlerFunc {
+func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO:
+		const destination = "api.accumulation.GetAllOrders"
+
+		logger = logger.With(
+			slog.String("destination", destination),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+
+		userID := r.Context().Value("user_id").(int)
+		orders := a.accumulationService.GetAllOrders(userID, storage)
+
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, orders)
 	}
 }
 

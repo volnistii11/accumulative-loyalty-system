@@ -33,19 +33,16 @@ func (s *Storage) GetUser(user *model.User) *model.User {
 }
 
 func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
-	if result := s.db.Create(accumulation); result.Error != nil {
+	if result := s.db.Select("user_id", "order_number", "uploaded_at", "processing_status").Create(accumulation); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (s *Storage) GetAllOrders(userID string) (*model.Accumulations, error) {
-	var (
-		orders *model.Accumulations
-		err    error
-	)
-	// TODO: get all orders by userID
-	return orders, err
+func (s *Storage) GetAllOrders(userID int) *model.Accumulations {
+	var orders model.Accumulations
+	s.db.Select("order_number", "uploaded_at", "processing_status", "amount").Where("user_id = ?", userID).Find(&orders)
+	return &orders
 }
 
 func (s *Storage) GetUserBalance(userID string) (float64, float64, error) {

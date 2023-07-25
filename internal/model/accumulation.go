@@ -3,14 +3,14 @@ package model
 import "time"
 
 type Accumulation struct {
-	ID               int       `json:"id" gorm:"primaryKey"`
-	UserID           int       `json:"user_id""`
-	OrderNumber      int       `json:"order_number"`
-	UploadedAt       time.Time `json:"uploaded_at"`
-	ProcessingStatus string    `json:"processing_status" gorm:"default:NEW"`
-	AccrualStatus    string    `json:"accrual_status" gorm:"default:null"`
-	Amount           int       `json:"amount" gorm:"default:null"`
-	ProcessedAt      time.Time `json:"processed_at" gorm:"default:null"`
+	ID               int        `json:"id,omitempty" gorm:"primaryKey"`
+	UserID           int        `json:"user_id,omitempty"`
+	OrderNumber      int        `json:"order_number,omitempty"`
+	UploadedAt       *time.Time `json:"uploaded_at,omitempty"`
+	ProcessingStatus string     `json:"processing_status,omitempty"`
+	AccrualStatus    string     `json:"accrual_status,omitempty"`
+	Amount           int        `json:"amount,omitempty"`
+	ProcessedAt      *time.Time `json:"processed_at,omitempty"`
 }
 
 type Accumulations []*Accumulation

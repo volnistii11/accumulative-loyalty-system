@@ -17,13 +17,24 @@ type OrderAdder interface {
 }
 
 func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAdder) error {
-	accumulation.UploadedAt = time.Now()
+	currentTime := time.Now()
+	accumulation.UploadedAt = &currentTime
+	accumulation.ProcessingStatus = "NEW"
 
 	err := db.AddOrder(accumulation)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+type AllOrdersGetter interface {
+	GetAllOrders(userID int) *model.Accumulations
+}
+
+func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) *model.Accumulations {
+	orders := db.GetAllOrders(userID)
+	return orders
 }
 
 type OrderChecker interface {
