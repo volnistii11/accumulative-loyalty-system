@@ -48,7 +48,5 @@ func main() {
 	router := server.NewRouter(logger, storage, &cfg).Serve()
 	http.ListenAndServe(cfg.GetHTTPServerAddress(), router)
 
-	// TODO: run server
-
 	// TODO: swagger
 }

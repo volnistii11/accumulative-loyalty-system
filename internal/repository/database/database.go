@@ -21,7 +21,7 @@ func NewStorage(db *gorm.DB) *Storage {
 }
 
 func (s *Storage) RegisterUser(user *model.User) error {
-	if result := s.db.Create(&user); result.Error != nil {
+	if result := s.db.Create(user); result.Error != nil {
 		return result.Error
 	}
 	return nil
@@ -32,21 +32,20 @@ func (s *Storage) GetUser(user *model.User) *model.User {
 	return user
 }
 
-func (s *Storage) PutOrder(orderNumber string) error {
-	var (
-		err error
-	)
-	// TODO: put in order number into database into accumulation table
-	return err
+func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
+	if result := s.db.Create(accumulation); result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 func (s *Storage) GetAllOrders(userID string) (*model.Accumulations, error) {
 	var (
-		accumulations *model.Accumulations
-		err           error
+		orders *model.Accumulations
+		err    error
 	)
 	// TODO: get all orders by userID
-	return accumulations, err
+	return orders, err
 }
 
 func (s *Storage) GetUserBalance(userID string) (float64, float64, error) {
@@ -74,6 +73,24 @@ func (s *Storage) GetAllUserWithdrawals(userID int) (*model.Withdrawals, error) 
 	)
 	// TODO: get all users withdrawals
 	return withdrawals, err
+}
+
+func (s *Storage) OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool {
+	result := s.db.Where(&accumulation).Find(&accumulation)
+	if result.RowsAffected > 0 {
+		return true
+	}
+	return false
+}
+
+func (s *Storage) OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool {
+	result := s.db.
+		Where("user_id != ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).
+		Find(accumulation)
+	if result.RowsAffected > 0 {
+		return true
+	}
+	return false
 }
 
 func RunMigrations(dsn string) error {

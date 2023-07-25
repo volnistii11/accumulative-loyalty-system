@@ -28,7 +28,8 @@ func NewRouter(logger *slog.Logger, storage *database.Storage, cfg *config.Parse
 }
 
 func (router *Router) Serve() *chi.Mux {
-	apiAccumulation := api.NewAccumulation()
+	accumulationService := service.NewAccumulation()
+	apiAccumulation := api.NewAccumulation(accumulationService)
 
 	authService := service.NewAuth()
 	apiAuth := api.NewAuth(authService)
@@ -43,7 +44,7 @@ func (router *Router) Serve() *chi.Mux {
 		r.Post("/api/user/login", apiAuth.AuthenticateUser(router.logger, router.storage))
 		r.Group(func(r chi.Router) {
 			r.Use(auth.ParseToken(router.logger))
-			r.Post("/api/user/orders", apiAccumulation.PutOrder())
+			r.Post("/api/user/orders", apiAccumulation.PutOrder(router.logger, router.storage))
 			r.Get("/api/user/orders", apiAccumulation.GetAllOrders())
 			r.Get("/api/user/balance", apiAccumulation.GetUserBalance())
 			r.Post("/api/user/balance/withdraw", apiAccumulation.DoWithdraw())
