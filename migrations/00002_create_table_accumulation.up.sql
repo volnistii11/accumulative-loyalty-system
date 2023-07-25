@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS accumulations
     id                serial primary key,
     user_id           integer                  not null,
     order_number      decimal                  null,
-    uploaded_at       timestamp with time zone not null,
+    uploaded_at       timestamp with time zone null,
     processing_status processing_state         null,
     accrual_status    accrual_state            null,
     amount            float8                   null,

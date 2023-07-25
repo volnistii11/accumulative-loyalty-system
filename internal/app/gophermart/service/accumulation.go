@@ -67,13 +67,22 @@ func (accum *Accumulation) Withdraw(userID int, withdraw *model.Withdraw, db Poi
 		UserID:      userID,
 		OrderNumber: withdraw.OrderNumber,
 		Amount:      -withdraw.WriteOffAmount,
-		UploadedAt:  &currentTime,
+		ProcessedAt: &currentTime,
 	}
 	err := db.Withdraw(accumulation)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+type AllUserWithdrawalsGetter interface {
+	GetAllUserWithdrawals(userID int) *model.Withdrawals
+}
+
+func (accum *Accumulation) GetAllUserWithdrawals(userID int, db AllUserWithdrawalsGetter) *model.Withdrawals {
+	withdrawals := db.GetAllUserWithdrawals(userID)
+	return withdrawals
 }
 
 type OrderChecker interface {

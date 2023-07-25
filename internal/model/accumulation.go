@@ -26,9 +26,9 @@ type Withdraw struct {
 }
 
 type Withdrawal struct {
-	OrderNumber int
-	Amount      float64
-	ProcessedAt int
+	OrderNumber int        `json:"order"`
+	Amount      float64    `json:"sum"`
+	ProcessedAt *time.Time `json:"processed_at"`
 }
 
-type Withdrawals []*Withdrawals
+type Withdrawals []*Withdrawal

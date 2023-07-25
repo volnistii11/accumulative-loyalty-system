@@ -177,8 +177,25 @@ func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage
 	}
 }
 
-func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
+func (a *Accumulation) GetAllUserWithdrawals(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO:
+		const destination = "api.accumulation.GetAllUserWithdrawals"
+
+		logger = logger.With(
+			slog.String("destination", destination),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+
+		userID := r.Context().Value("user_id").(int)
+		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID, storage)
+		if len(*withdrawals) == 0 {
+			logger.Info("user have not withdrawals")
+			w.WriteHeader(http.StatusNoContent)
+			render.JSON(w, r, "user have not withdrawals")
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, withdrawals)
 	}
 }
