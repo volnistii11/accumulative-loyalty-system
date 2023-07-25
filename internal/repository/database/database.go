@@ -52,12 +52,11 @@ func (s *Storage) GetUserBalance(userID int) *model.Balance {
 	return &balance
 }
 
-func (s *Storage) Withdraw(orderNumber int, amount int) error {
-	var (
-		err error
-	)
-	// TODO: withdraw from user balance
-	return err
+func (s *Storage) Withdraw(accumulation *model.Accumulation) error {
+	if result := s.db.Select("user_id", "order_number", "uploaded_at", "amount").Create(accumulation); result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 func (s *Storage) GetAllUserWithdrawals(userID int) (*model.Withdrawals, error) {

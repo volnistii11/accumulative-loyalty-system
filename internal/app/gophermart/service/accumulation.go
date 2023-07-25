@@ -48,6 +48,34 @@ func (accum *Accumulation) GetUserBalance(userID int, db UserBalanceGetter) *mod
 	return balance
 }
 
+func (accum *Accumulation) IsTheBalanceGreaterThanTheWriteOffAmount(userID int, amount float64, db UserBalanceGetter) bool {
+	balance := db.GetUserBalance(userID)
+	finalBalance := balance.Current + balance.Withdrawn
+	if finalBalance >= amount {
+		return true
+	}
+	return false
+}
+
+type PointsWithdrawal interface {
+	Withdraw(accumulation *model.Accumulation) error
+}
+
+func (accum *Accumulation) Withdraw(userID int, withdraw *model.Withdraw, db PointsWithdrawal) error {
+	currentTime := time.Now()
+	accumulation := &model.Accumulation{
+		UserID:      userID,
+		OrderNumber: withdraw.OrderNumber,
+		Amount:      -withdraw.WriteOffAmount,
+		UploadedAt:  &currentTime,
+	}
+	err := db.Withdraw(accumulation)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type OrderChecker interface {
 	OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool
 	OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool

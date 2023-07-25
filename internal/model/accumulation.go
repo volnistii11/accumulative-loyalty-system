@@ -9,7 +9,7 @@ type Accumulation struct {
 	UploadedAt       *time.Time `json:"uploaded_at,omitempty"`
 	ProcessingStatus string     `json:"processing_status,omitempty"`
 	AccrualStatus    string     `json:"accrual_status,omitempty"`
-	Amount           int        `json:"amount,omitempty"`
+	Amount           float64    `json:"amount,omitempty"`
 	ProcessedAt      *time.Time `json:"processed_at,omitempty"`
 }
 
@@ -18,6 +18,11 @@ type Accumulations []*Accumulation
 type Balance struct {
 	Current   float64 `json:"current"`
 	Withdrawn float64 `json:"withdrawn"`
+}
+
+type Withdraw struct {
+	OrderNumber    int     `json:"order,string"`
+	WriteOffAmount float64 `json:"sum"`
 }
 
 type Withdrawal struct {

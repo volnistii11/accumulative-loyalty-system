@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS accumulations
     user_id           integer                  not null,
     order_number      decimal                  null,
     uploaded_at       timestamp with time zone not null,
-    processing_status processing_state         not null,
+    processing_status processing_state         null,
     accrual_status    accrual_state            null,
-    amount            decimal                  null,
+    amount            float8                   null,
     processed_at      timestamp with time zone null
 );
 CREATE INDEX accumulations_user_id_index on accumulations (user_id);

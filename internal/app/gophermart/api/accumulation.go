@@ -132,13 +132,52 @@ func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Sto
 	}
 }
 
-func (a *Accumulation) DoWithdraw() http.HandlerFunc {
+func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO:
+		const destination = "api.accumulation.DoWithdraw"
+
+		logger = logger.With(
+			slog.String("destination", destination),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+
+		var withdraw model.Withdraw
+		if err := render.DecodeJSON(r.Body, &withdraw); err != nil {
+			logger.Error("failed to decode request body", sl.Err(err))
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, "failed to decode request")
+			return
+		}
+		userID := r.Context().Value("user_id").(int)
+
+		if !luhn.Valid(withdraw.OrderNumber) {
+			logger.Error("order number format is incorrect")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			render.JSON(w, r, "order number format is incorrect")
+			return
+		}
+
+		if !a.accumulationService.IsTheBalanceGreaterThanTheWriteOffAmount(userID, withdraw.WriteOffAmount, storage) {
+			logger.Error("not enough points")
+			w.WriteHeader(http.StatusPaymentRequired)
+			render.JSON(w, r, "not enough points")
+			return
+		}
+
+		err := a.accumulationService.Withdraw(userID, &withdraw, storage)
+		if err != nil {
+			logger.Error("withdraw failed", sl.Err(err))
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, "withdraw failed")
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, "")
 	}
 }
 
-func (a *Accumulation) GetAllUserWithdrawls() http.HandlerFunc {
+func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO:
 	}
