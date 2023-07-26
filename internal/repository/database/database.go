@@ -82,6 +82,28 @@ func (s *Storage) OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accum
 	return result.RowsAffected > 0
 }
 
+func (s *Storage) GetNewOrders() []string {
+	var orders []string
+	s.db.Table("accumulations").
+		Select("order_number").
+		Where("processing_status = ?", "NEW").
+		Find(&orders)
+	return orders
+}
+
+func (s *Storage) UpdateAccrualInfoForOrderNumber(newInfo *model.AccrualSystemAnswer) error {
+	var accumulation model.Accumulation
+	result := s.db.Model(&accumulation).
+		Where("order_number = ?", newInfo.OrderNumber).
+		Update("processing_status", newInfo.AccrualStatus).
+		Update("accrual_status", newInfo.AccrualStatus).
+		Update("amount", newInfo.Amount)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func RunMigrations(dsn string) error {
 	const migrationsPath = "./migrations"
 

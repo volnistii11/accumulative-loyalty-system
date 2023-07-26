@@ -32,3 +32,9 @@ type Withdrawal struct {
 }
 
 type Withdrawals []*Withdrawal
+
+type AccrualSystemAnswer struct {
+	OrderNumber   int     `json:"order,string"`
+	AccrualStatus string  `json:"status"`
+	Amount        float64 `json:"accrual"`
+}
