@@ -1,14 +1,14 @@
-version: "3.9"
+version: "3.7"
 services:
-  postgres:
+  postgres_db:
     image: postgres:15.3
+    restart: always
     environment:
-      POSTGRES_DB: "gophermart"
-      POSTGRES_USER: "pguser"
-      POSTGRES_PASSWORD: "pgpwd4habr"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - ./db/init:/docker-entrypoint-initdb.d
-      - ./db/data:/var/lib/postgresql/data
+      - POSTGRES_PASSWORD=RASKkCt3PVEU
+      - POSTGRES_USER=gophermart
+      - POSTGRES_DB=gophermart
+      - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
