@@ -15,8 +15,5 @@ func GetCodeFromGORMMessage(err error) string {
 }
 
 func IsDuplicateKey(err error) bool {
-	if GetCodeFromGORMMessage(err) == pgerrcode.UniqueViolation {
-		return true
-	}
-	return false
+	return GetCodeFromGORMMessage(err) == pgerrcode.UniqueViolation
 }

@@ -33,10 +33,12 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 				return
 			}
 
+			type key string
+			var keyUserID key = "user_id"
+
 			logger.Info("user authorized")
-			ctx := context.WithValue(r.Context(), "user_id", userID)
+			ctx := context.WithValue(r.Context(), keyUserID, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
-			return
 		}
 		return http.HandlerFunc(fn)
 	}

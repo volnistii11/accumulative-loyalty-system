@@ -72,20 +72,14 @@ func (s *Storage) GetAllUserWithdrawals(userID int) *model.Withdrawals {
 
 func (s *Storage) OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool {
 	result := s.db.Where(&accumulation).Find(&accumulation)
-	if result.RowsAffected > 0 {
-		return true
-	}
-	return false
+	return result.RowsAffected > 0
 }
 
 func (s *Storage) OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool {
 	result := s.db.
 		Where("user_id != ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).
 		Find(accumulation)
-	if result.RowsAffected > 0 {
-		return true
-	}
-	return false
+	return result.RowsAffected > 0
 }
 
 func RunMigrations(dsn string) error {
