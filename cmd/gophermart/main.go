@@ -45,7 +45,7 @@ func main() {
 
 	storage := database.NewStorage(conn)
 
-	router := server.NewRouter(logger, storage, &cfg).Serve()
+	router := server.NewRouter(logger, storage, cfg).Serve()
 	http.ListenAndServe(cfg.GetHTTPServerAddress(), router)
 
 	// TODO: swagger
