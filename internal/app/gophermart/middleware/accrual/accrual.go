@@ -22,30 +22,21 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 
 			accrualService := service.NewAccrual()
 			newOrders := accrualService.GetNewOrders(storage)
-			fmt.Println("------------------------------------------")
-			fmt.Println("NEW ORDERS", newOrders)
-			fmt.Println("LEN NEW ORDERS", len(newOrders))
 			if len(newOrders) > 0 {
 				for _, newOrder := range newOrders {
 					accrualSystemAddress := fmt.Sprintf("%s%s", cfg.GetAccrualSystemAddress(), "/api/orders/")
-					fmt.Println("ACCRUAL SYSTEM ADDRESS", accrualSystemAddress)
 					answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, accrualSystemAddress)
-					fmt.Println("ANSWER", answer)
-					fmt.Println("ANSWERERROR", err)
 					if err != nil {
 						slog.Error("", sl.Err(err))
 						continue
 					}
 					err = accrualService.UpdateAccrualInfoForOrderNumber(storage, answer)
-					fmt.Println("UPDATEERR", err)
 					if err != nil {
 						slog.Error("", sl.Err(err))
 						continue
 					}
 				}
 			}
-			fmt.Println("------------------------------------------")
-
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
