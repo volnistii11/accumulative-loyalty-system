@@ -100,6 +100,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		w.Header().Add("content-type", "application/json")
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		orders, err := a.accumulationService.GetAllOrders(userID, storage)
 		if err != nil {
@@ -117,7 +118,6 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Header().Add("Content-Type", "application/json")
 		render.JSON(w, r, orders)
 	}
 }
