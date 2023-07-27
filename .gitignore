@@ -23,5 +23,3 @@ vendor/
 .vscode
 
 db/
-
-docker-compose.yaml
