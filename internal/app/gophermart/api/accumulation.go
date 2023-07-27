@@ -131,6 +131,7 @@ func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Sto
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		w.Header().Add("content-type", "application/json")
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		balance := a.accumulationService.GetUserBalance(userID, storage)
 
@@ -193,6 +194,7 @@ func (a *Accumulation) GetAllUserWithdrawals(logger *slog.Logger, storage *datab
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		w.Header().Add("content-type", "application/json")
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID, storage)
 		if len(*withdrawals) == 0 {
