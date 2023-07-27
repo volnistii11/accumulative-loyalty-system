@@ -101,7 +101,13 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 		)
 
 		userID := r.Context().Value("user_id").(int)
-		orders := a.accumulationService.GetAllOrders(userID, storage)
+		orders, err := a.accumulationService.GetAllOrders(userID, storage)
+		if err != nil {
+			logger.Error("get all orders", sl.Err(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			render.JSON(w, r, "error when getting all order numbers")
+			return
+		}
 
 		if len(*orders) == 0 {
 			logger.Info("user have not order numbers")

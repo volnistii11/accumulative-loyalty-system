@@ -30,12 +30,15 @@ func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAd
 }
 
 type AllOrdersGetter interface {
-	GetAllOrders(userID int) *model.Accumulations
+	GetAllOrders(userID int) (*model.Accumulations, error)
 }
 
-func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) *model.Accumulations {
-	orders := db.GetAllOrders(userID)
-	return orders
+func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) (*model.Accumulations, error) {
+	orders, err := db.GetAllOrders(userID)
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
 
 type UserBalanceGetter interface {
