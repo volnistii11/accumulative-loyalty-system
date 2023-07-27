@@ -100,7 +100,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		userID := r.Context().Value("user_id").(int)
+		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		orders, err := a.accumulationService.GetAllOrders(userID, storage)
 		if err != nil {
 			logger.Error("get all orders", sl.Err(err))
@@ -131,7 +131,7 @@ func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Sto
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		userID := r.Context().Value("user_id").(int)
+		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		balance := a.accumulationService.GetUserBalance(userID, storage)
 
 		w.WriteHeader(http.StatusOK)
@@ -155,7 +155,7 @@ func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		userID := r.Context().Value("user_id").(int)
+		userID := r.Context().Value(model.ContextKeyUserID).(int)
 
 		if !luhn.Valid(withdraw.OrderNumber) {
 			logger.Error("order number format is incorrect")
@@ -193,7 +193,7 @@ func (a *Accumulation) GetAllUserWithdrawals(logger *slog.Logger, storage *datab
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		userID := r.Context().Value("user_id").(int)
+		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID, storage)
 		if len(*withdrawals) == 0 {
 			logger.Info("user have not withdrawals")
