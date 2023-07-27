@@ -27,6 +27,7 @@ func (a *Accrual) GetNewOrders(db NewOrderGetter) []string {
 func (a *Accrual) SendOrderNumbersToAccrualSystem(orderNumber string, endpoint string) (*model.AccrualSystemAnswer, error) {
 	//endpoint example: http://localhost:8080/api/orders/
 	endpointWithOrderNumber := fmt.Sprintf("%s%s", endpoint, orderNumber)
+	fmt.Println("END POINT", endpointWithOrderNumber)
 	client := &http.Client{}
 
 	request, err := http.NewRequest(http.MethodPost, endpointWithOrderNumber, strings.NewReader(""))
