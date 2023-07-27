@@ -15,10 +15,10 @@ type Router struct {
 	httpServer *chi.Mux
 	logger     *slog.Logger
 	storage    *database.Storage
-	cfg        *config.ParserGetter
+	cfg        config.ParserGetter
 }
 
-func NewRouter(logger *slog.Logger, storage *database.Storage, cfg *config.ParserGetter) *Router {
+func NewRouter(logger *slog.Logger, storage *database.Storage, cfg config.ParserGetter) *Router {
 	return &Router{
 		httpServer: chi.NewRouter(),
 		logger:     logger,
