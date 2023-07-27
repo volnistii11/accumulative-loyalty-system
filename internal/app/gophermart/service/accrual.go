@@ -48,12 +48,9 @@ func (a *Accrual) SendOrderNumbersToAccrualSystem(orderNumber string, endpoint s
 	fmt.Println("--------------------------------")
 	fmt.Println("--------------------------------")
 	fmt.Println("--------------------------------")
-	var test interface{}
 	var accrualSystemAnswer model.AccrualSystemAnswer
 	err = json.NewDecoder(response.Body).Decode(&accrualSystemAnswer)
-	err = json.NewDecoder(response.Body).Decode(&test)
 	fmt.Println(accrualSystemAnswer)
-	fmt.Println(test)
 	if err != nil {
 		return nil, err
 	}
