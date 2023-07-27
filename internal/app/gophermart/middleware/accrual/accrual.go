@@ -25,6 +25,7 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 			fmt.Println("------------------------------------------")
 			fmt.Println("NEW ORDERS", newOrders)
 			fmt.Println("LEN NEW ORDERS", len(newOrders))
+			fmt.Println("ACCRUAL SYSTEM ADDRESS", cfg.GetAccrualSystemAddress())
 			if len(newOrders) > 0 {
 				for _, newOrder := range newOrders {
 					answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, cfg.GetAccrualSystemAddress())
