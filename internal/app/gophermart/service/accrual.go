@@ -30,7 +30,7 @@ func (a *Accrual) SendOrderNumbersToAccrualSystem(orderNumber string, endpoint s
 	fmt.Println("END POINT", endpointWithOrderNumber)
 	client := &http.Client{}
 
-	request, err := http.NewRequest(http.MethodPost, endpointWithOrderNumber, strings.NewReader(""))
+	request, err := http.NewRequest(http.MethodGet, endpointWithOrderNumber, strings.NewReader(""))
 	if err != nil {
 		return nil, err
 	}
