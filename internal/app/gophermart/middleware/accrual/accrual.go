@@ -25,12 +25,12 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 				answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, cfg.GetAccrualSystemAddress())
 				if err != nil {
 					slog.Error("", sl.Err(err))
-					return
+					continue
 				}
 				err = accrualService.UpdateAccrualInfoForOrderNumber(storage, answer)
 				if err != nil {
 					slog.Error("", sl.Err(err))
-					return
+					continue
 				}
 			}
 

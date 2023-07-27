@@ -100,7 +100,6 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		w.Header().Add("content-type", "application/json")
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		orders, err := a.accumulationService.GetAllOrders(userID, storage)
 		if err != nil {
@@ -117,6 +116,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			return
 		}
 
+		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, orders)
 	}
@@ -194,7 +194,6 @@ func (a *Accumulation) GetAllUserWithdrawals(logger *slog.Logger, storage *datab
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		w.Header().Add("content-type", "application/json")
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID, storage)
 		if len(*withdrawals) == 0 {
@@ -204,6 +203,7 @@ func (a *Accumulation) GetAllUserWithdrawals(logger *slog.Logger, storage *datab
 			return
 		}
 
+		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, withdrawals)
 	}
