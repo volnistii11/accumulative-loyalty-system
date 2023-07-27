@@ -1,6 +1,7 @@
 package accrual
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
@@ -21,18 +22,27 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 
 			accrualService := service.NewAccrual()
 			newOrders := accrualService.GetNewOrders(storage)
-			for _, newOrder := range newOrders {
-				answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, cfg.GetAccrualSystemAddress())
-				if err != nil {
-					slog.Error("", sl.Err(err))
-					continue
-				}
-				err = accrualService.UpdateAccrualInfoForOrderNumber(storage, answer)
-				if err != nil {
-					slog.Error("", sl.Err(err))
-					continue
+			fmt.Println("------------------------------------------")
+			fmt.Println("NEW ORDERS", newOrders)
+			fmt.Println("LEN NEW ORDERS", len(newOrders))
+			if len(newOrders) > 0 {
+				for _, newOrder := range newOrders {
+					answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, cfg.GetAccrualSystemAddress())
+					fmt.Println("ANSWER", answer)
+					fmt.Println("ANSWERERROR", err)
+					if err != nil {
+						slog.Error("", sl.Err(err))
+						continue
+					}
+					err = accrualService.UpdateAccrualInfoForOrderNumber(storage, answer)
+					fmt.Println("UPDATEERR", err)
+					if err != nil {
+						slog.Error("", sl.Err(err))
+						continue
+					}
 				}
 			}
+			fmt.Println("------------------------------------------")
 
 			next.ServeHTTP(w, r)
 		}
