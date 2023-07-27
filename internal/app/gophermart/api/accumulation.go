@@ -62,7 +62,7 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 		}
 
 		accumulation.OrderNumber = orderNumber
-		accumulation.UserID = r.Context().Value("user_id").(int)
+		accumulation.UserID = r.Context().Value(model.ContextKeyUserID).(int)
 
 		if a.accumulationService.OrderExistsAndBelongsToTheUser(&accumulation, storage) {
 			logger.Info("order exists and belongs to the user")

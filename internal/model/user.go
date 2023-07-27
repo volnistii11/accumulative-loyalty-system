@@ -7,3 +7,7 @@ type User struct {
 }
 
 type Users []*User
+
+type ContextKey string
+
+const ContextKeyUserID = ContextKey("user_id")

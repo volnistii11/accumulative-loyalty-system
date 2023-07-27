@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"golang.org/x/exp/slog"
 	"net/http"
 )
@@ -33,11 +34,8 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 				return
 			}
 
-			type key string
-			var keyUserID key = "user_id"
-
 			logger.Info("user authorized")
-			ctx := context.WithValue(r.Context(), keyUserID, userID)
+			ctx := context.WithValue(r.Context(), model.ContextKeyUserID, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(fn)
