@@ -6,6 +6,23 @@ import (
 	"time"
 )
 
+// Accumulation TODO:
+//
+//	type Accumulation struct {
+//		example OrderExample
+//	}
+//
+//	type OrderExample interface {
+//		OrderAdder
+//		AllOrdersGetter
+//		//....
+//	}
+//
+//	func NewAccumulation(db OrderExample) *Accumulation {
+//		return &Accumulation{
+//			example: db,
+//		}
+//	}
 type Accumulation struct {
 }
 

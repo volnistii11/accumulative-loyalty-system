@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/client"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/server"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
@@ -44,6 +45,8 @@ func main() {
 	logger.Info("migrations started")
 
 	storage := database.NewStorage(conn)
+
+	go client.DoAccrualIfPossible(logger, storage, cfg)
 
 	router := server.NewRouter(logger, storage, cfg).Serve()
 	http.ListenAndServe(cfg.GetHTTPServerAddress(), router)

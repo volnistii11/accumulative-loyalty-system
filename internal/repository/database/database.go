@@ -89,7 +89,7 @@ func (s *Storage) GetNewOrders() []string {
 	var orders []string
 	s.db.Table("accumulations").
 		Select("order_number").
-		Where("processing_status = ?", "NEW").
+		Where("processing_status = 'NEW' OR processing_status = 'PROCESSING'").
 		Find(&orders)
 	return orders
 }
