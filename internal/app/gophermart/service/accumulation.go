@@ -38,7 +38,7 @@ func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAd
 	currentTime := time.Now()
 	accumulation.UploadedAt = &currentTime
 	accumulation.ProcessingStatus = "NEW"
-	
+
 	err := db.AddOrder(accumulation)
 	if err != nil {
 		return err
@@ -64,6 +64,7 @@ type UserBalanceGetter interface {
 
 func (accum *Accumulation) GetUserBalance(userID int, db UserBalanceGetter) *model.Balance {
 	balance := db.GetUserBalance(userID)
+	balance.Current = balance.Current - balance.Withdrawn
 	balance.Withdrawn = math.Abs(balance.Withdrawn)
 	return balance
 }
