@@ -21,7 +21,7 @@ type Balance struct {
 }
 
 type Withdraw struct {
-	OrderNumber    int     `json:"order,string"`
+	OrderNumber    int     `json:"order"`
 	WriteOffAmount float64 `json:"sum"`
 }
 
