@@ -34,7 +34,6 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 				return
 			}
 
-			logger.Info("user authorized")
 			ctx := context.WithValue(r.Context(), model.ContextKeyUserID, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
