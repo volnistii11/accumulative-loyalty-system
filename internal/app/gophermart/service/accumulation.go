@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"math"
 	"time"
@@ -39,9 +38,7 @@ func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAd
 	currentTime := time.Now()
 	accumulation.UploadedAt = &currentTime
 	accumulation.ProcessingStatus = "NEW"
-
-	fmt.Println("Add order")
-	fmt.Printf("%+v\n", accumulation)
+	
 	err := db.AddOrder(accumulation)
 	if err != nil {
 		return err
@@ -57,10 +54,6 @@ func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) ([]model
 	orders, err := db.GetAllOrders(userID)
 	if err != nil {
 		return nil, err
-	}
-	fmt.Println("GetAllOrders")
-	for _, order := range orders {
-		fmt.Printf("%+v\n", order)
 	}
 	return orders, nil
 }

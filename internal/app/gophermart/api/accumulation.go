@@ -33,7 +33,7 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 			accumulation model.Accumulation
 		)
 
-		logger = logger.With(
+		logger := logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
@@ -86,6 +86,7 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 			return
 		}
 
+		logger.Info("Put order:", accumulation)
 		w.WriteHeader(http.StatusAccepted)
 		render.JSON(w, r, "order number accepted for processing")
 	}
