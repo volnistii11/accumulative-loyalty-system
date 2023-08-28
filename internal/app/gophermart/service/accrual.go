@@ -47,7 +47,7 @@ func (a *Accrual) SendOrderNumbersToAccrualSystem(orderNumber string, endpoint s
 	defer response.Body.Close()
 	var accrualSystemAnswer model.AccrualSystemAnswer
 	err = json.NewDecoder(response.Body).Decode(&accrualSystemAnswer)
-	fmt.Println(accrualSystemAnswer)
+
 	if err != nil {
 		return nil, err
 	}
