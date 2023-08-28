@@ -50,16 +50,18 @@ func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAd
 }
 
 type AllOrdersGetter interface {
-	GetAllOrders(userID int) (*model.Accumulations, error)
+	GetAllOrders(userID int) ([]model.Accumulation, error)
 }
 
-func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) (*model.Accumulations, error) {
+func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) ([]model.Accumulation, error) {
 	orders, err := db.GetAllOrders(userID)
 	if err != nil {
 		return nil, err
 	}
 	fmt.Println("GetAllOrders")
-	fmt.Printf("%+v\n", *orders)
+	for _, order := range orders {
+		fmt.Printf("%+v\n", order)
+	}
 	return orders, nil
 }
 

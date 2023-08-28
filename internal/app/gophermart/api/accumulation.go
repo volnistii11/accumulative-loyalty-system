@@ -109,7 +109,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			return
 		}
 
-		if len(*orders) == 0 {
+		if len(orders) == 0 {
 			logger.Info("user have not order numbers")
 			w.WriteHeader(http.StatusNoContent)
 			render.JSON(w, r, "user have not order numbers")
