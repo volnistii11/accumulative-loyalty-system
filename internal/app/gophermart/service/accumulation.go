@@ -64,8 +64,8 @@ type UserBalanceGetter interface {
 
 func (accum *Accumulation) GetUserBalance(userID int, db UserBalanceGetter) *model.Balance {
 	balance := db.GetUserBalance(userID)
-	balance.Current = balance.Current - balance.Withdrawn
 	balance.Withdrawn = math.Abs(balance.Withdrawn)
+	balance.Current = balance.Current - balance.Withdrawn
 	return balance
 }
 
