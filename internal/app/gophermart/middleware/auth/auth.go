@@ -13,7 +13,7 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			const destination = "middleware.auth.ParseToken"
-			logger = logger.With(
+			logger := logger.With(
 				slog.String("destination", destination),
 				slog.String("request_id", middleware.GetReqID(r.Context())),
 			)
