@@ -95,7 +95,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 	return func(w http.ResponseWriter, r *http.Request) {
 		const destination = "api.accumulation.GetAllOrders"
 
-		logger = logger.With(
+		logger := logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
@@ -116,6 +116,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			return
 		}
 
+		logger.Info("Order items:", orders)
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, orders)
