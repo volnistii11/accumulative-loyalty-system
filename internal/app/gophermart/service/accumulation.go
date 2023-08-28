@@ -59,7 +59,7 @@ func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) (*model.
 		return nil, err
 	}
 	fmt.Println("GetAllOrders")
-	fmt.Printf("%+v\n", orders)
+	fmt.Printf("%+v\n", *orders)
 	return orders, nil
 }
 
