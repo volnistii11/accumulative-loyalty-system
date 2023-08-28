@@ -25,16 +25,16 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 				accrualSystemAddress := fmt.Sprintf("%s%s", cfg.GetAccrualSystemAddress(), "/api/orders/")
 				answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, accrualSystemAddress)
 				if err != nil {
-					slog.Error("", sl.Err(err))
+					logger.Error("", sl.Err(err))
 					continue
 				}
 				err = accrualService.UpdateAccrualInfoForOrderNumber(storage, answer)
 				if err != nil {
-					slog.Error("", sl.Err(err))
+					logger.Error("", sl.Err(err))
 					continue
 				}
 			}
 		}
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second)
 	}
 }
