@@ -40,7 +40,8 @@ func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAd
 	accumulation.UploadedAt = &currentTime
 	accumulation.ProcessingStatus = "NEW"
 
-	fmt.Println("Add order", accumulation)
+	fmt.Println("Add order")
+	fmt.Sprintf("%+v\n", accumulation)
 	err := db.AddOrder(accumulation)
 	if err != nil {
 		return err
@@ -57,7 +58,8 @@ func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) (*model.
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("GetAllORders", orders)
+	fmt.Println("GetAllOrders")
+	fmt.Sprintf("%+v\n", orders)
 	return orders, nil
 }
 
