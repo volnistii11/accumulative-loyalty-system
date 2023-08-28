@@ -41,7 +41,7 @@ func (accum *Accumulation) AddOrder(accumulation *model.Accumulation, db OrderAd
 	accumulation.ProcessingStatus = "NEW"
 
 	fmt.Println("Add order")
-	fmt.Sprintf("%+v\n", accumulation)
+	fmt.Printf("%+v\n", accumulation)
 	err := db.AddOrder(accumulation)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (accum *Accumulation) GetAllOrders(userID int, db AllOrdersGetter) (*model.
 		return nil, err
 	}
 	fmt.Println("GetAllOrders")
-	fmt.Sprintf("%+v\n", orders)
+	fmt.Printf("%+v\n", orders)
 	return orders, nil
 }
 
