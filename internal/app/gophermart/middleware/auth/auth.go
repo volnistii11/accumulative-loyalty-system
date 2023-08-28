@@ -22,7 +22,6 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 			if err != nil {
 				logger.Info("jwt token is not found")
 				w.WriteHeader(http.StatusUnauthorized)
-				next.ServeHTTP(w, r)
 				return
 			}
 
@@ -30,7 +29,6 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 			if userID == -1 {
 				logger.Info("user unauthorized")
 				w.WriteHeader(http.StatusUnauthorized)
-				next.ServeHTTP(w, r)
 				return
 			}
 
