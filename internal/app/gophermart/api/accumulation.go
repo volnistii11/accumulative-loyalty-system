@@ -137,6 +137,7 @@ func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Sto
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
 		balance := a.accumulationService.GetUserBalance(userID, storage)
 
+		logger.Info("Current balance", balance)
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, balance)
 	}
@@ -181,7 +182,7 @@ func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage
 			render.JSON(w, r, "withdraw failed")
 			return
 		}
-
+		logger.Info("Withdraw:", withdraw)
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, "")
 	}
