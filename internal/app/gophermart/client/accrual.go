@@ -16,7 +16,6 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 		slog.String("destination", destination),
 	)
 
-	logger.Info("access to the accumulation system is started")
 	for {
 		accrualService := service.NewAccrual()
 		newOrders := accrualService.GetNewOrders(storage)
