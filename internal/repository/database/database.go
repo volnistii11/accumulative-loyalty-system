@@ -37,7 +37,7 @@ func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
 	if result.Error != nil {
 		return result.Error
 	}
-	fmt.Println(result)
+	fmt.Println(result.RowsAffected)
 	return nil
 }
 
