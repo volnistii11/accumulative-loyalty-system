@@ -118,7 +118,7 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 		}
 
 		logger.Info("Order items:", orders)
-		w.Header().Add("content-type", "application/json")
+		w.Header().Add("content-type", "text/plain")
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, orders)
 	}
