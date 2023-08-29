@@ -5,11 +5,11 @@ import "time"
 type Accumulation struct {
 	ID               int        `json:"id,omitempty" gorm:"primaryKey"`
 	UserID           int        `json:"user_id,omitempty"`
-	OrderNumber      int        `json:"order_number,omitempty"`
+	OrderNumber      int        `json:"number,omitempty"`
 	UploadedAt       *time.Time `json:"uploaded_at,omitempty"`
-	ProcessingStatus string     `json:"processing_status,omitempty"`
+	ProcessingStatus string     `json:"status,omitempty"`
 	AccrualStatus    string     `json:"accrual_status,omitempty"`
-	Amount           float64    `json:"amount,omitempty"`
+	Amount           float64    `json:"accrual,omitempty"`
 	ProcessedAt      *time.Time `json:"processed_at,omitempty"`
 }
 
