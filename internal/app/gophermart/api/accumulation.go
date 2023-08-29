@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
@@ -118,11 +117,10 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 			return
 		}
 
-		fmt.Println(orders[0])
 		logger.Info("Order items:", orders)
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		render.JSON(w, r, orders)
+		render.JSON(w, r, "")
 	}
 }
 
