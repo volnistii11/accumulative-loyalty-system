@@ -120,7 +120,8 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 		logger.Info("Order items:", orders)
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		render.JSON(w, r, 123)
+		a := []byte("{\n\t\"match\": \"` qwertyuiopas `\",\n\t\"reward\": 5,\n\t\"reward_type\": \"%\"\n}\n")
+		render.JSON(w, r, a)
 	}
 }
 
