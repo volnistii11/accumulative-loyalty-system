@@ -5,7 +5,7 @@ import "time"
 type Accumulation struct {
 	ID               int        `json:"id,omitempty" gorm:"primaryKey"`
 	UserID           int        `json:"user_id,omitempty"`
-	OrderNumber      int        `json:"number,omitempty"`
+	OrderNumber      int        `json:"number,omitempty,string"`
 	UploadedAt       *time.Time `json:"uploaded_at,omitempty"`
 	ProcessingStatus string     `json:"status,omitempty"`
 	AccrualStatus    string     `json:"accrual_status,omitempty"`
