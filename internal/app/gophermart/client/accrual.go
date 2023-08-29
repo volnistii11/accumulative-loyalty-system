@@ -35,6 +35,6 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 				}
 			}
 		}
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 10)
 	}
 }

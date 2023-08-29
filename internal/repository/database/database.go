@@ -33,12 +33,9 @@ func (s *Storage) GetUser(user *model.User) *model.User {
 }
 
 func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
-	result := s.db.Select("user_id", "order_number", "uploaded_at", "processing_status").Create(accumulation)
-	if result.Error != nil {
+	if result := s.db.Select("user_id", "order_number", "uploaded_at", "processing_status").Create(accumulation); result.Error != nil {
 		return result.Error
 	}
-	fmt.Println(accumulation.ID)
-	fmt.Println(result.RowsAffected)
 	return nil
 }
 
