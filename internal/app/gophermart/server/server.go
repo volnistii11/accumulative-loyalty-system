@@ -28,11 +28,11 @@ func NewRouter(logger *slog.Logger, storage *database.Storage, cfg config.Parser
 }
 
 func (router *Router) Serve() *chi.Mux {
+	authService := service.NewAuth(router.storage)
+	apiAuth := api.NewAuth(authService, router.logger)
+
 	accumulationService := service.NewAccumulation()
 	apiAccumulation := api.NewAccumulation(accumulationService)
-
-	authService := service.NewAuth(router.storage)
-	apiAuth := api.NewAuth(authService)
 
 	router.httpServer.Group(func(r chi.Router) {
 		r.Use(middleware.RequestID)
@@ -40,8 +40,8 @@ func (router *Router) Serve() *chi.Mux {
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.URLFormat)
 
-		r.Post("/api/user/register", apiAuth.RegisterUser(router.logger, router.storage))
-		r.Post("/api/user/login", apiAuth.AuthenticateUser(router.logger, router.storage))
+		r.Post("/api/user/register", apiAuth.RegisterUser())
+		r.Post("/api/user/login", apiAuth.AuthenticateUser())
 		r.Group(func(r chi.Router) {
 			r.Use(auth.ParseToken(router.logger))
 			r.Post("/api/user/orders", apiAccumulation.PutOrder(router.logger, router.storage))
