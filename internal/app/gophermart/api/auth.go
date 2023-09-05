@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/gerr"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
@@ -12,11 +11,16 @@ import (
 	"net/http"
 )
 
-type Auth struct {
-	authService *service.Auth
+type UserAuthorize interface {
+	RegisterUser(user *model.User) error
+	AuthenticateUser(user *model.User) (string, error)
 }
 
-func NewAuth(authService *service.Auth) *Auth {
+type Auth struct {
+	authService UserAuthorize
+}
+
+func NewAuth(authService UserAuthorize) *Auth {
 	return &Auth{
 		authService: authService,
 	}
@@ -46,7 +50,7 @@ func (a *Auth) RegisterUser(logger *slog.Logger, storage *database.Storage) http
 			return
 		}
 
-		err = a.authService.RegisterUser(&user, storage)
+		err = a.authService.RegisterUser(&user)
 		if err != nil {
 			logger.Error("failed user register", sl.Err(err))
 			if gerr.IsDuplicateKey(err) {
@@ -60,7 +64,7 @@ func (a *Auth) RegisterUser(logger *slog.Logger, storage *database.Storage) http
 		}
 		logger.Info("user registered")
 
-		jwtToken, err := a.authService.AuthenticateUser(&user, storage)
+		jwtToken, err := a.authService.AuthenticateUser(&user)
 		if err != nil {
 			logger.Error("failed user authentication", sl.Err(err))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -99,7 +103,7 @@ func (a *Auth) AuthenticateUser(logger *slog.Logger, storage *database.Storage) 
 			return
 		}
 
-		jwtToken, err := a.authService.AuthenticateUser(&user, storage)
+		jwtToken, err := a.authService.AuthenticateUser(&user)
 		if err != nil {
 			logger.Error("failed user authentication", sl.Err(err))
 			w.WriteHeader(http.StatusInternalServerError)

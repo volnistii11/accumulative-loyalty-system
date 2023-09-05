@@ -15,34 +15,34 @@ const (
 	tokenTTL   = 12 * time.Hour
 )
 
-type Auth struct {
-}
-
-func NewAuth() *Auth {
-	return &Auth{}
-}
-
-type UserRegistrar interface {
+type UserAuthorize interface {
 	RegisterUser(user *model.User) error
+	GetUser(user *model.User) *model.User
 }
 
-func (a *Auth) RegisterUser(user *model.User, db UserRegistrar) error {
+type Auth struct {
+	db UserAuthorize
+}
+
+func NewAuth(db UserAuthorize) *Auth {
+	return &Auth{
+		db: db,
+	}
+}
+
+func (a *Auth) RegisterUser(user *model.User) error {
 	user.Password = generatePasswordHash(user.Password)
-	err := db.RegisterUser(user)
+	err := a.db.RegisterUser(user)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type UserAuthenticator interface {
-	GetUser(user *model.User) *model.User
-}
-
-func (a *Auth) AuthenticateUser(user *model.User, db UserAuthenticator) (string, error) {
+func (a *Auth) AuthenticateUser(user *model.User) (string, error) {
 	user.Password = generatePasswordHash(user.Password)
 
-	user = db.GetUser(user)
+	user = a.db.GetUser(user)
 	if user.ID == 0 {
 		return "", nil
 	}
