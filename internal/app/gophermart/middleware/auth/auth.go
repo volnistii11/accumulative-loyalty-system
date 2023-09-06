@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/app/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"golang.org/x/exp/slog"
 	"net/http"
 )
@@ -32,7 +32,7 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), model.ContextKeyUserID, userID)
+			ctx := context.WithValue(r.Context(), constants.ContextKeyUserID, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(fn)

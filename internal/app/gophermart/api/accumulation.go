@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/app/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/luhn"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
@@ -216,5 +217,5 @@ func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
 }
 
 func getUserIDFromRequest(r *http.Request) int {
-	return r.Context().Value(model.ContextKeyUserID).(int)
+	return r.Context().Value(constants.ContextKeyUserID).(int)
 }
