@@ -3,6 +3,8 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/pkg/errors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/luhn"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
@@ -68,22 +70,22 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 		accumulation.OrderNumber = orderNumber
 		accumulation.UserID = getUserIDFromRequest(r)
 
-		if a.accumulationService.OrderExistsAndBelongsToTheUser(&accumulation) {
-			logger.Info("order exists and belongs to the user")
-			w.WriteHeader(http.StatusOK)
-			render.JSON(w, r, "order exists and belongs to the user")
-			return
-		}
-
-		if a.accumulationService.OrderExistsAndDoesNotBelongToTheUser(&accumulation) {
-			logger.Info("order exists and does not belong to the user")
-			w.WriteHeader(http.StatusConflict)
-			render.JSON(w, r, "order exists and does not belong to the user")
-			return
-		}
-
 		err = a.accumulationService.AddOrder(&accumulation)
 		if err != nil {
+			if errors.Is(err, cerrors.ErrDBOrderExistsAndBelongsToTheUser) {
+				logger.Info("order exists and belongs to the user")
+				w.WriteHeader(http.StatusOK)
+				render.JSON(w, r, "order exists and belongs to the user")
+				return
+			}
+
+			if errors.Is(err, cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser) {
+				logger.Info("order exists and does not belong to the user")
+				w.WriteHeader(http.StatusConflict)
+				render.JSON(w, r, "order exists and does not belong to the user")
+				return
+			}
+
 			logger.Error("add user", sl.Err(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, "error when adding user")

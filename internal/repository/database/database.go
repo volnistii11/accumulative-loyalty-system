@@ -6,6 +6,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/pkg/errors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"gorm.io/gorm"
 )
@@ -33,9 +34,26 @@ func (s *Storage) GetUser(user *model.User) *model.User {
 }
 
 func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
-	if result := s.db.Select("user_id", "order_number", "uploaded_at", "processing_status").Create(accumulation); result.Error != nil {
-		return result.Error
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		if !s.OrderExistsAndBelongsToTheUser(accumulation) {
+			return cerrors.ErrDBOrderExistsAndBelongsToTheUser
+		}
+
+		if !s.OrderExistsAndDoesNotBelongToTheUser(accumulation) {
+			return cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser
+		}
+
+		if result := tx.Select("user_id", "order_number", "uploaded_at", "processing_status").Create(accumulation); result.Error != nil {
+			return result.Error
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
