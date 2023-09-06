@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/app/constants"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/luhn"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"

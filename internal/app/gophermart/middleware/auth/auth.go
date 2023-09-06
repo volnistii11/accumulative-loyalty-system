@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/app/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"golang.org/x/exp/slog"
 	"net/http"
