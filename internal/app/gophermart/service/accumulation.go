@@ -12,8 +12,6 @@ type AdderGetterChecker interface {
 	GetUserBalance(userID int) *model.Balance
 	Withdraw(accumulation *model.Accumulation) error
 	GetAllUserWithdrawals(userID int) *model.Withdrawals
-	OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool
-	OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool
 }
 
 type Accumulation struct {
@@ -77,12 +75,4 @@ func (accum *Accumulation) Withdraw(userID int, withdraw *model.Withdraw) error 
 func (accum *Accumulation) GetAllUserWithdrawals(userID int) *model.Withdrawals {
 	withdrawals := accum.db.GetAllUserWithdrawals(userID)
 	return withdrawals
-}
-
-func (accum *Accumulation) OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool {
-	return accum.db.OrderExistsAndBelongsToTheUser(accumulation)
-}
-
-func (accum *Accumulation) OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool {
-	return accum.db.OrderExistsAndDoesNotBelongToTheUser(accumulation)
 }

@@ -93,7 +93,9 @@ func (s *Storage) GetAllUserWithdrawals(userID int) *model.Withdrawals {
 }
 
 func (s *Storage) OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool {
-	result := s.db.Where(&accumulation).Find(&accumulation)
+	result := s.db.
+		Where("user_id = ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).
+		Find(accumulation)
 	return result.RowsAffected > 0
 }
 
