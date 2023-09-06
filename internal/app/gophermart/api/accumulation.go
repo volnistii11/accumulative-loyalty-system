@@ -136,11 +136,11 @@ func (a *Accumulation) GetUserBalance() http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		w.Header().Add("content-type", "application/json")
 		userID := getUserIDFromRequest(r)
 		balance := a.accumulationService.GetUserBalance(userID)
 
 		logger.Info("Current balance", balance)
+		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, balance)
 	}
