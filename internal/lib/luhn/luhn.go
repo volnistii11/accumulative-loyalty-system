@@ -1,7 +1,15 @@
 package luhn
 
-func Valid(number int) bool {
-	return (number%10+checksum(number/10))%10 == 0
+import (
+	"strconv"
+)
+
+func Valid(number string) bool {
+	numberInt, err := strconv.Atoi(number)
+	if err != nil {
+		return false
+	}
+	return (numberInt%10+checksum(numberInt/10))%10 == 0
 }
 
 func checksum(number int) int {

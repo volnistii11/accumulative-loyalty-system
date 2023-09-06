@@ -9,7 +9,6 @@ import (
 	"golang.org/x/exp/slog"
 	"io"
 	"net/http"
-	"strconv"
 )
 
 type AccumulationServiceWorker interface {
@@ -40,7 +39,7 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 		const destination = "api.accumulation.PutOrder"
 		var (
 			err          error
-			orderNumber  int
+			orderNumber  string
 			accumulation model.Accumulation
 		)
 
@@ -56,13 +55,7 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		orderNumber, err = strconv.Atoi(string(body))
-		if err != nil {
-			logger.Error("request format is incorrect", sl.Err(err))
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, "request format is incorrect")
-			return
-		}
+		orderNumber = string(body)
 
 		if !luhn.Valid(orderNumber) {
 			logger.Error("order number format is incorrect")

@@ -5,7 +5,7 @@ import "time"
 type Accumulation struct {
 	ID               int        `json:"id,omitempty" gorm:"primaryKey"`
 	UserID           int        `json:"user_id,omitempty"`
-	OrderNumber      int        `json:"number,omitempty,string"`
+	OrderNumber      string     `json:"number,omitempty,string"`
 	UploadedAt       *time.Time `json:"uploaded_at,omitempty"`
 	ProcessingStatus string     `json:"status,omitempty"`
 	AccrualStatus    string     `json:"accrual_status,omitempty"`
@@ -21,12 +21,12 @@ type Balance struct {
 }
 
 type Withdraw struct {
-	OrderNumber    int     `json:"order,string"`
+	OrderNumber    string  `json:"order,string"`
 	WriteOffAmount float64 `json:"sum"`
 }
 
 type Withdrawal struct {
-	OrderNumber int        `json:"order,string"`
+	OrderNumber string     `json:"order,string"`
 	Amount      float64    `json:"sum"`
 	ProcessedAt *time.Time `json:"processed_at"`
 }
@@ -34,7 +34,7 @@ type Withdrawal struct {
 type Withdrawals []*Withdrawal
 
 type AccrualSystemAnswer struct {
-	OrderNumber   int     `json:"order,string"`
+	OrderNumber   string  `json:"order,string"`
 	AccrualStatus string  `json:"status"`
 	Amount        float64 `json:"accrual"`
 }
