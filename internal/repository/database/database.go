@@ -36,6 +36,7 @@ func (s *Storage) GetUser(user *model.User) *model.User {
 func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		if s.OrderExistsAndBelongsToTheUser(accumulation) {
+			fmt.Println("belongs to the user")
 			return cerrors.ErrDBOrderExistsAndBelongsToTheUser
 		}
 
