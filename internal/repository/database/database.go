@@ -41,7 +41,7 @@ func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
 		}
 
 		if s.OrderExistsAndDoesNotBelongToTheUser(accumulation) {
-			fmt.Println("belongs to the user")
+			fmt.Println("not belongs to the user")
 			return cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser
 		}
 
