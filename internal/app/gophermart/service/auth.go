@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"time"
 )
@@ -76,7 +77,7 @@ func BuildJWTString(userID int) (string, error) {
 	return tokenString, nil
 }
 
-func GetUserID(tokenString string) int {
+func GetUserID(tokenString string) (int, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
 		func(t *jwt.Token) (interface{}, error) {
@@ -86,12 +87,12 @@ func GetUserID(tokenString string) int {
 			return []byte(signingKey), nil
 		})
 	if err != nil {
-		return -1
+		return 0, cerrors.ErrHTTPStatusUnauthorized
 	}
 	if !token.Valid {
-		return -1
+		return 0, cerrors.ErrHTTPStatusUnauthorized
 	}
-	return claims.UserID
+	return claims.UserID, nil
 }
 
 func generatePasswordHash(password string) string {

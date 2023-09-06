@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/constants"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"golang.org/x/exp/slog"
 	"net/http"
 )
@@ -25,9 +26,9 @@ func ParseToken(logger *slog.Logger) func(next http.Handler) http.Handler {
 				return
 			}
 
-			userID := service.GetUserID(jwtToken.Value)
-			if userID == -1 {
-				logger.Info("user unauthorized")
+			userID, err := service.GetUserID(jwtToken.Value)
+			if err != nil {
+				logger.Info("", sl.Err(err))
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
