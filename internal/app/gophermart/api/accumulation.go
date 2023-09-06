@@ -49,7 +49,6 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		defer r.Body.Close()
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			logger.Error("failed to decode request body", sl.Err(err))
