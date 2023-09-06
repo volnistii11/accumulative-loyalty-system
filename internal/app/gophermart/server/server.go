@@ -31,8 +31,8 @@ func (router *Router) Serve() *chi.Mux {
 	authService := service.NewAuth(router.storage)
 	apiAuth := api.NewAuth(authService, router.logger)
 
-	accumulationService := service.NewAccumulation()
-	apiAccumulation := api.NewAccumulation(accumulationService)
+	accumulationService := service.NewAccumulation(router.storage)
+	apiAccumulation := api.NewAccumulation(accumulationService, router.logger)
 
 	router.httpServer.Group(func(r chi.Router) {
 		r.Use(middleware.RequestID)
@@ -44,11 +44,11 @@ func (router *Router) Serve() *chi.Mux {
 		r.Post("/api/user/login", apiAuth.AuthenticateUser())
 		r.Group(func(r chi.Router) {
 			r.Use(auth.ParseToken(router.logger))
-			r.Post("/api/user/orders", apiAccumulation.PutOrder(router.logger, router.storage))
-			r.Get("/api/user/orders", apiAccumulation.GetAllOrders(router.logger, router.storage))
-			r.Get("/api/user/balance", apiAccumulation.GetUserBalance(router.logger, router.storage))
-			r.Post("/api/user/balance/withdraw", apiAccumulation.DoWithdraw(router.logger, router.storage))
-			r.Get("/api/user/withdrawals", apiAccumulation.GetAllUserWithdrawals(router.logger, router.storage))
+			r.Post("/api/user/orders", apiAccumulation.PutOrder())
+			r.Get("/api/user/orders", apiAccumulation.GetAllOrders())
+			r.Get("/api/user/balance", apiAccumulation.GetUserBalance())
+			r.Post("/api/user/balance/withdraw", apiAccumulation.DoWithdraw())
+			r.Get("/api/user/withdrawals", apiAccumulation.GetAllUserWithdrawals())
 		})
 	})
 

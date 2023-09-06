@@ -3,28 +3,39 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/luhn"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/repository/database"
 	"golang.org/x/exp/slog"
 	"io"
 	"net/http"
 	"strconv"
 )
 
-type Accumulation struct {
-	accumulationService *service.Accumulation
+type AccumulationServiceWorker interface {
+	AddOrder(accumulation *model.Accumulation) error
+	GetAllOrders(userID int) ([]model.Accumulation, error)
+	GetUserBalance(userID int) *model.Balance
+	IsTheBalanceGreaterThanTheWriteOffAmount(userID int, amount float64) bool
+	Withdraw(userID int, withdraw *model.Withdraw) error
+	GetAllUserWithdrawals(userID int) *model.Withdrawals
+	OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool
+	OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool
 }
 
-func NewAccumulation(accumulationService *service.Accumulation) *Accumulation {
+type Accumulation struct {
+	accumulationService AccumulationServiceWorker
+	logger              *slog.Logger
+}
+
+func NewAccumulation(accumulationService AccumulationServiceWorker, logger *slog.Logger) *Accumulation {
 	return &Accumulation{
 		accumulationService: accumulationService,
+		logger:              logger,
 	}
 }
 
-func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
+func (a *Accumulation) PutOrder() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const destination = "api.accumulation.PutOrder"
 		var (
@@ -33,7 +44,7 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 			accumulation model.Accumulation
 		)
 
-		logger := logger.With(
+		logger := a.logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
@@ -64,21 +75,21 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 		accumulation.OrderNumber = orderNumber
 		accumulation.UserID = r.Context().Value(model.ContextKeyUserID).(int)
 
-		if a.accumulationService.OrderExistsAndBelongsToTheUser(&accumulation, storage) {
+		if a.accumulationService.OrderExistsAndBelongsToTheUser(&accumulation) {
 			logger.Info("order exists and belongs to the user")
 			w.WriteHeader(http.StatusOK)
 			render.JSON(w, r, "order exists and belongs to the user")
 			return
 		}
 
-		if a.accumulationService.OrderExistsAndDoesNotBelongToTheUser(&accumulation, storage) {
+		if a.accumulationService.OrderExistsAndDoesNotBelongToTheUser(&accumulation) {
 			logger.Info("order exists and does not belong to the user")
 			w.WriteHeader(http.StatusConflict)
 			render.JSON(w, r, "order exists and does not belong to the user")
 			return
 		}
 
-		err = a.accumulationService.AddOrder(&accumulation, storage)
+		err = a.accumulationService.AddOrder(&accumulation)
 		if err != nil {
 			logger.Error("add user", sl.Err(err))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -92,17 +103,17 @@ func (a *Accumulation) PutOrder(logger *slog.Logger, storage *database.Storage) 
 	}
 }
 
-func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
+func (a *Accumulation) GetAllOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const destination = "api.accumulation.GetAllOrders"
 
-		logger := logger.With(
+		logger := a.logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
-		orders, err := a.accumulationService.GetAllOrders(userID, storage)
+		orders, err := a.accumulationService.GetAllOrders(userID)
 		if err != nil {
 			logger.Error("get all orders", sl.Err(err))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -124,18 +135,18 @@ func (a *Accumulation) GetAllOrders(logger *slog.Logger, storage *database.Stora
 	}
 }
 
-func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
+func (a *Accumulation) GetUserBalance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const destination = "api.accumulation.GetUserBalance"
 
-		logger = logger.With(
+		logger := a.logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
 		w.Header().Add("content-type", "application/json")
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
-		balance := a.accumulationService.GetUserBalance(userID, storage)
+		balance := a.accumulationService.GetUserBalance(userID)
 
 		logger.Info("Current balance", balance)
 		w.WriteHeader(http.StatusOK)
@@ -143,11 +154,11 @@ func (a *Accumulation) GetUserBalance(logger *slog.Logger, storage *database.Sto
 	}
 }
 
-func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
+func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const destination = "api.accumulation.DoWithdraw"
 
-		logger = logger.With(
+		logger := a.logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
@@ -168,14 +179,14 @@ func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage
 			return
 		}
 
-		if !a.accumulationService.IsTheBalanceGreaterThanTheWriteOffAmount(userID, withdraw.WriteOffAmount, storage) {
+		if !a.accumulationService.IsTheBalanceGreaterThanTheWriteOffAmount(userID, withdraw.WriteOffAmount) {
 			logger.Error("not enough points")
 			w.WriteHeader(http.StatusPaymentRequired)
 			render.JSON(w, r, "not enough points")
 			return
 		}
 
-		err := a.accumulationService.Withdraw(userID, &withdraw, storage)
+		err := a.accumulationService.Withdraw(userID, &withdraw)
 		if err != nil {
 			logger.Error("withdraw failed", sl.Err(err))
 			w.WriteHeader(http.StatusBadRequest)
@@ -188,17 +199,17 @@ func (a *Accumulation) DoWithdraw(logger *slog.Logger, storage *database.Storage
 	}
 }
 
-func (a *Accumulation) GetAllUserWithdrawals(logger *slog.Logger, storage *database.Storage) http.HandlerFunc {
+func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const destination = "api.accumulation.GetAllUserWithdrawals"
 
-		logger = logger.With(
+		logger := a.logger.With(
 			slog.String("destination", destination),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
 		userID := r.Context().Value(model.ContextKeyUserID).(int)
-		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID, storage)
+		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID)
 		if len(*withdrawals) == 0 {
 			logger.Info("user have not withdrawals")
 			w.WriteHeader(http.StatusNoContent)
