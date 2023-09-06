@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/customErrors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"net/http"
 	"strings"
@@ -41,11 +41,11 @@ func (a *Accrual) SendOrderNumbersToAccrualSystem(orderNumber string, endpoint s
 	}
 
 	if response.StatusCode == http.StatusNoContent {
-		return nil, customErrors.ErrHTTPStatusNoContent
+		return nil, cerrors.ErrHTTPStatusNoContent
 	}
 
 	if response.StatusCode == http.StatusTooManyRequests {
-		return nil, customErrors.ErrHTTPStatusTooManyRequests
+		return nil, cerrors.ErrHTTPStatusTooManyRequests
 	}
 
 	if response.StatusCode != http.StatusOK {

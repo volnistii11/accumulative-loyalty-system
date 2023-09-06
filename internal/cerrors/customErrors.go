@@ -1,4 +1,4 @@
-package customErrors
+package cerrors
 
 import "github.com/pkg/errors"
 
