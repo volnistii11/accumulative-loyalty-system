@@ -51,12 +51,6 @@ func (accum *Accumulation) GetUserBalance(userID int) *model.Balance {
 	return balance
 }
 
-func (accum *Accumulation) IsTheBalanceGreaterThanTheWriteOffAmount(userID int, amount float64) bool {
-	balance := accum.db.GetUserBalance(userID)
-	finalBalance := balance.Current + balance.Withdrawn
-	return finalBalance >= amount
-}
-
 func (accum *Accumulation) Withdraw(userID int, withdraw *model.Withdraw) error {
 	currentTime := time.Now()
 	accumulation := &model.Accumulation{

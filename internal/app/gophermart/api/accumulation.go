@@ -18,7 +18,6 @@ type AccumulationServiceWorker interface {
 	AddOrder(accumulation *model.Accumulation) error
 	GetAllOrders(userID int) ([]model.Accumulation, error)
 	GetUserBalance(userID int) *model.Balance
-	IsTheBalanceGreaterThanTheWriteOffAmount(userID int, amount float64) bool
 	Withdraw(userID int, withdraw *model.Withdraw) error
 	GetAllUserWithdrawals(userID int) *model.Withdrawals
 }
