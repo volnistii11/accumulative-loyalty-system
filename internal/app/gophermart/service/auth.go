@@ -45,7 +45,7 @@ func (a *Auth) AuthenticateUser(user *model.User) (string, error) {
 
 	user = a.db.GetUser(user)
 	if user.ID == 0 {
-		return "", nil
+		return "", cerrors.ErrHTTPStatusNoContent
 	}
 
 	jwtToken, err := BuildJWTString(user.ID)
