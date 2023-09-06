@@ -1,9 +1,11 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/app/gophermart/service"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/config"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/customErrors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/repository/database"
 	"golang.org/x/exp/slog"
@@ -31,6 +33,9 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 					answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, accrualSystemAddress)
 					if err != nil {
 						logger.Error("", sl.Err(err))
+						if errors.Is(err, customErrors.ErrHTTPStatusTooManyRequests) {
+							time.Sleep(time.Second * 60)
+						}
 					} else {
 						logger.Info("accrual system answer: ", answer)
 						err = accrualService.UpdateAccrualInfoForOrderNumber(storage, answer)
