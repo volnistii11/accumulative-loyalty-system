@@ -73,9 +73,23 @@ func (s *Storage) GetUserBalance(userID int) *model.Balance {
 }
 
 func (s *Storage) Withdraw(accumulation *model.Accumulation) error {
-	if result := s.db.Select("user_id", "order_number", "processed_at", "amount").Create(accumulation); result.Error != nil {
-		return result.Error
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		var amount float64
+		tx.Table("accumulations").Select("SUM(amount)").Where("user_id = ?", accumulation.UserID).Find(&amount)
+		if amount < accumulation.Amount {
+			return cerrors.ErrDBNotEnoughCoins
+		}
+
+		if result := tx.Select("user_id", "order_number", "processed_at", "amount").Create(accumulation); result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
+
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
@@ -88,20 +102,6 @@ func (s *Storage) GetAllUserWithdrawals(userID int) *model.Withdrawals {
 		Order("processed_at").Find(&withdrawals)
 
 	return &withdrawals
-}
-
-func (s *Storage) OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool {
-	result := s.db.
-		Where("user_id = ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).
-		Find(accumulation)
-	return result.RowsAffected > 0
-}
-
-func (s *Storage) OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool {
-	result := s.db.
-		Where("user_id != ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).
-		Find(accumulation)
-	return result.RowsAffected > 0
 }
 
 func (s *Storage) GetNewOrders() []string {
