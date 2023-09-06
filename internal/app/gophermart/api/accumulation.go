@@ -21,8 +21,6 @@ type AccumulationServiceWorker interface {
 	IsTheBalanceGreaterThanTheWriteOffAmount(userID int, amount float64) bool
 	Withdraw(userID int, withdraw *model.Withdraw) error
 	GetAllUserWithdrawals(userID int) *model.Withdrawals
-	OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool
-	OrderExistsAndDoesNotBelongToTheUser(accumulation *model.Accumulation) bool
 }
 
 type Accumulation struct {

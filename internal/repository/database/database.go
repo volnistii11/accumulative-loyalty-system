@@ -35,13 +35,11 @@ func (s *Storage) GetUser(user *model.User) *model.User {
 
 func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-		if s.OrderExistsAndBelongsToTheUser(accumulation) {
-			fmt.Println("belongs to the user")
+		if result := tx.Where("user_id = ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).Find(accumulation); result.RowsAffected > 0 {
 			return cerrors.ErrDBOrderExistsAndBelongsToTheUser
 		}
 
-		if s.OrderExistsAndDoesNotBelongToTheUser(accumulation) {
-			fmt.Println("not belongs to the user")
+		if result := tx.Where("user_id != ? AND order_number = ?", accumulation.UserID, accumulation.OrderNumber).Find(accumulation); result.RowsAffected > 0 {
 			return cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser
 		}
 
