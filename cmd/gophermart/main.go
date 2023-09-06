@@ -61,7 +61,8 @@ func main() {
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		<-sig
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(serverCtx, 30*time.Second)
+		defer cancel()
 
 		go func() {
 			<-shutdownCtx.Done()
