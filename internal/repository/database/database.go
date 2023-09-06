@@ -41,6 +41,7 @@ func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
 		}
 
 		if s.OrderExistsAndDoesNotBelongToTheUser(accumulation) {
+			fmt.Println("belongs to the user")
 			return cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser
 		}
 
@@ -93,7 +94,6 @@ func (s *Storage) GetAllUserWithdrawals(userID int) *model.Withdrawals {
 
 func (s *Storage) OrderExistsAndBelongsToTheUser(accumulation *model.Accumulation) bool {
 	result := s.db.Where(&accumulation).Find(&accumulation)
-	fmt.Println(result)
 	return result.RowsAffected > 0
 }
 
