@@ -46,7 +46,6 @@ func (s *Storage) AddOrder(accumulation *model.Accumulation) error {
 		if result := tx.Select("user_id", "order_number", "uploaded_at", "processing_status").Create(accumulation); result.Error != nil {
 			return result.Error
 		}
-
 		return nil
 	})
 

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/pkg/errors"
@@ -72,17 +73,18 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 
 		err = a.accumulationService.AddOrder(&accumulation)
 		if err != nil {
-			if errors.Is(err, cerrors.ErrDBOrderExistsAndBelongsToTheUser) {
-				logger.Info("order exists and belongs to the user")
-				w.WriteHeader(http.StatusOK)
-				render.JSON(w, r, "order exists and belongs to the user")
-				return
-			}
-
+			fmt.Println(err)
 			if errors.Is(err, cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser) {
 				logger.Info("order exists and does not belong to the user")
 				w.WriteHeader(http.StatusConflict)
 				render.JSON(w, r, "order exists and does not belong to the user")
+				return
+			}
+
+			if errors.Is(err, cerrors.ErrDBOrderExistsAndBelongsToTheUser) {
+				logger.Info("order exists and belongs to the user")
+				w.WriteHeader(http.StatusOK)
+				render.JSON(w, r, "order exists and belongs to the user")
 				return
 			}
 
