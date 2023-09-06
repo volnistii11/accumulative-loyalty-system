@@ -172,15 +172,14 @@ func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 			return
 		}
 
-		if !a.accumulationService.IsTheBalanceGreaterThanTheWriteOffAmount(userID, withdraw.WriteOffAmount) {
-			logger.Error("not enough points")
-			w.WriteHeader(http.StatusPaymentRequired)
-			render.JSON(w, r, "not enough points")
-			return
-		}
-
 		err := a.accumulationService.Withdraw(userID, &withdraw)
 		if err != nil {
+			if errors.Is(err, cerrors.ErrDBNotEnoughCoins) {
+				logger.Error("not enough points")
+				w.WriteHeader(http.StatusPaymentRequired)
+				render.JSON(w, r, "not enough points")
+				return
+			}
 			logger.Error("withdraw failed", sl.Err(err))
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, "withdraw failed")
