@@ -65,7 +65,7 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 		}
 
 		accumulation.OrderNumber = orderNumber
-		accumulation.UserID = r.Context().Value(model.ContextKeyUserID).(int)
+		accumulation.UserID = getUserIDFromRequest(r)
 
 		if a.accumulationService.OrderExistsAndBelongsToTheUser(&accumulation) {
 			logger.Info("order exists and belongs to the user")
@@ -104,7 +104,7 @@ func (a *Accumulation) GetAllOrders() http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		userID := r.Context().Value(model.ContextKeyUserID).(int)
+		userID := getUserIDFromRequest(r)
 		orders, err := a.accumulationService.GetAllOrders(userID)
 		if err != nil {
 			logger.Error("get all orders", sl.Err(err))
@@ -137,7 +137,7 @@ func (a *Accumulation) GetUserBalance() http.HandlerFunc {
 		)
 
 		w.Header().Add("content-type", "application/json")
-		userID := r.Context().Value(model.ContextKeyUserID).(int)
+		userID := getUserIDFromRequest(r)
 		balance := a.accumulationService.GetUserBalance(userID)
 
 		logger.Info("Current balance", balance)
@@ -162,7 +162,7 @@ func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		userID := r.Context().Value(model.ContextKeyUserID).(int)
+		userID := getUserIDFromRequest(r)
 
 		if !luhn.Valid(withdraw.OrderNumber) {
 			logger.Error("order number format is incorrect")
@@ -200,7 +200,7 @@ func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		userID := r.Context().Value(model.ContextKeyUserID).(int)
+		userID := getUserIDFromRequest(r)
 		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID)
 		if len(*withdrawals) == 0 {
 			logger.Info("user have not withdrawals")
@@ -213,4 +213,8 @@ func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, withdrawals)
 	}
+}
+
+func getUserIDFromRequest(r *http.Request) int {
+	return r.Context().Value(model.ContextKeyUserID).(int)
 }
