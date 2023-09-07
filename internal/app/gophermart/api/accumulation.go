@@ -3,10 +3,7 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/pkg/errors"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/constants"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/luhn"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"golang.org/x/exp/slog"
@@ -18,7 +15,7 @@ type AccumulationServiceWorker interface {
 	AddOrder(w http.ResponseWriter, accumulation *model.Accumulation) (http.ResponseWriter, error)
 	GetAllOrders(w http.ResponseWriter, userID int) (http.ResponseWriter, []model.Accumulation, error)
 	GetUserBalance(userID int) *model.Balance
-	Withdraw(userID int, withdraw *model.Withdraw) error
+	Withdraw(w http.ResponseWriter, userID int, withdraw *model.Withdraw) (http.ResponseWriter, error)
 	GetAllUserWithdrawals(userID int) *model.Withdrawals
 }
 
@@ -117,30 +114,14 @@ func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-
-		if !luhn.Valid(withdraw.OrderNumber) {
-			logger.Error("order number format is incorrect")
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			render.JSON(w, r, "order number format is incorrect")
-			return
-		}
-
 		userID := getUserIDFromRequest(r)
-		err := a.accumulationService.Withdraw(userID, &withdraw)
+
+		w, err := a.accumulationService.Withdraw(w, userID, &withdraw)
 		if err != nil {
-			if errors.Is(err, cerrors.ErrDBNotEnoughCoins) {
-				logger.Error("not enough points")
-				w.WriteHeader(http.StatusPaymentRequired)
-				render.JSON(w, r, "not enough points")
-				return
-			}
-			logger.Error("withdraw failed", sl.Err(err))
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, "withdraw failed")
+			render.JSON(w, r, err.Error())
 			return
 		}
-		logger.Info("Withdraw:", withdraw)
-		w.WriteHeader(http.StatusOK)
+
 		render.JSON(w, r, "")
 	}
 }

@@ -92,7 +92,13 @@ func (accum *Accumulation) GetUserBalance(userID int) *model.Balance {
 	return balance
 }
 
-func (accum *Accumulation) Withdraw(userID int, withdraw *model.Withdraw) error {
+func (accum *Accumulation) Withdraw(w http.ResponseWriter, userID int, withdraw *model.Withdraw) (http.ResponseWriter, error) {
+	if !luhn.Valid(withdraw.OrderNumber) {
+		accum.logger.Error("order number format is incorrect")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return w, cerrors.ErrOrderNumberIncorrect
+	}
+
 	currentTime := time.Now()
 	accumulation := &model.Accumulation{
 		UserID:      userID,
@@ -102,9 +108,19 @@ func (accum *Accumulation) Withdraw(userID int, withdraw *model.Withdraw) error 
 	}
 	err := accum.db.Withdraw(accumulation)
 	if err != nil {
-		return err
+		if errors.Is(err, cerrors.ErrDBNotEnoughCoins) {
+			accum.logger.Error("not enough points")
+			w.WriteHeader(http.StatusPaymentRequired)
+			return w, cerrors.ErrDBNotEnoughCoins
+		}
+		accum.logger.Error("withdraw failed", sl.Err(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return w, cerrors.ErrHTTPBadRequest
 	}
-	return nil
+
+	accum.logger.Info("Withdraw:", withdraw)
+	w.WriteHeader(http.StatusOK)
+	return w, nil
 }
 
 func (accum *Accumulation) GetAllUserWithdrawals(userID int) *model.Withdrawals {
