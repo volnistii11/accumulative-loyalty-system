@@ -75,30 +75,13 @@ func (a *Auth) AuthenticateUser() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		if user.Login == "" || user.Password == "" {
-			a.logger.Error("wrong request format")
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, "wrong request format")
-			return
-		}
 
-		jwtToken, err := a.authService.AuthenticateUser(&user)
+		w, err = a.authService.AuthenticateUser(w, &user)
 		if err != nil {
-			a.logger.Error("failed user authentication", sl.Err(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, "internal error")
+			render.JSON(w, r, err.Error())
 			return
 		}
-		if jwtToken == "" {
-			a.logger.Error("user or password is incorrect")
-			w.WriteHeader(http.StatusUnauthorized)
-			render.JSON(w, r, "user or password is incorrect")
-			return
-		}
-		a.logger.Info("user authenticated")
 
-		cookie := http.Cookie{Name: "jwtToken", Value: jwtToken}
-		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
 	}
 }

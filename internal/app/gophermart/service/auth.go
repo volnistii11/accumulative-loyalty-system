@@ -77,6 +77,12 @@ func (a *Auth) AuthenticateUser(w http.ResponseWriter, user *model.User) (http.R
 	}
 	a.logger.Info("user authenticated")
 
+	if jwtToken == "" {
+		a.logger.Error("user or password is incorrect")
+		w.WriteHeader(http.StatusUnauthorized)
+		return w, cerrors.ErrUserOrPasswordIncorrect
+	}
+
 	cookie := http.Cookie{Name: "jwtToken", Value: jwtToken}
 	http.SetCookie(w, &cookie)
 	w.WriteHeader(http.StatusOK)
