@@ -16,7 +16,7 @@ type AccumulationServiceWorker interface {
 	GetAllOrders(w http.ResponseWriter, userID int) (http.ResponseWriter, []model.Accumulation, error)
 	GetUserBalance(userID int) *model.Balance
 	Withdraw(w http.ResponseWriter, userID int, withdraw *model.Withdraw) (http.ResponseWriter, error)
-	GetAllUserWithdrawals(userID int) *model.Withdrawals
+	GetAllUserWithdrawals(w http.ResponseWriter, userID int) (http.ResponseWriter, *model.Withdrawals, error)
 }
 
 type Accumulation struct {
@@ -128,24 +128,12 @@ func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 
 func (a *Accumulation) GetAllUserWithdrawals() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const destination = "api.accumulation.GetAllUserWithdrawals"
-
-		logger := a.logger.With(
-			slog.String("destination", destination),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
-
 		userID := getUserIDFromRequest(r)
-		withdrawals := a.accumulationService.GetAllUserWithdrawals(userID)
-		if len(*withdrawals) == 0 {
-			logger.Info("user have not withdrawals")
-			w.WriteHeader(http.StatusNoContent)
-			render.JSON(w, r, "user have not withdrawals")
+		w, withdrawals, err := a.accumulationService.GetAllUserWithdrawals(w, userID)
+		if err != nil {
+			render.JSON(w, r, err.Error())
 			return
 		}
-
-		w.Header().Add("content-type", "application/json")
-		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, withdrawals)
 	}
 }

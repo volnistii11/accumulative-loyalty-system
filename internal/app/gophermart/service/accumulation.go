@@ -123,7 +123,15 @@ func (accum *Accumulation) Withdraw(w http.ResponseWriter, userID int, withdraw 
 	return w, nil
 }
 
-func (accum *Accumulation) GetAllUserWithdrawals(userID int) *model.Withdrawals {
+func (accum *Accumulation) GetAllUserWithdrawals(w http.ResponseWriter, userID int) (http.ResponseWriter, *model.Withdrawals, error) {
 	withdrawals := accum.db.GetAllUserWithdrawals(userID)
-	return withdrawals
+	if len(*withdrawals) == 0 {
+		accum.logger.Info("user have not withdrawals")
+		w.WriteHeader(http.StatusNoContent)
+		return w, nil, cerrors.ErrHTTPStatusNoContent
+	}
+	
+	w.Header().Add("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	return w, withdrawals, nil
 }
