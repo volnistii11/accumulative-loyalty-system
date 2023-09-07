@@ -1,8 +1,14 @@
 package service
 
 import (
+	"errors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/luhn"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
+	"golang.org/x/exp/slog"
 	"math"
+	"net/http"
 	"time"
 )
 
@@ -15,25 +21,47 @@ type AdderGetterChecker interface {
 }
 
 type Accumulation struct {
-	db AdderGetterChecker
+	db     AdderGetterChecker
+	logger *slog.Logger
 }
 
-func NewAccumulation(db AdderGetterChecker) *Accumulation {
+func NewAccumulation(db AdderGetterChecker, logger *slog.Logger) *Accumulation {
 	return &Accumulation{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
-func (accum *Accumulation) AddOrder(accumulation *model.Accumulation) error {
+func (accum *Accumulation) AddOrder(w http.ResponseWriter, accumulation *model.Accumulation) (http.ResponseWriter, error) {
+	if !luhn.Valid(accumulation.OrderNumber) {
+		accum.logger.Error("order number format is incorrect")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return w, cerrors.ErrOrderNumberIncorrect
+	}
+
 	currentTime := time.Now()
 	accumulation.UploadedAt = &currentTime
 	accumulation.ProcessingStatus = "NEW"
 
 	err := accum.db.AddOrder(accumulation)
 	if err != nil {
-		return err
+		if errors.Is(err, cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser) {
+			accum.logger.Info("order exists and does not belong to the user")
+			w.WriteHeader(http.StatusConflict)
+			return w, cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser
+		}
+
+		if errors.Is(err, cerrors.ErrDBOrderExistsAndBelongsToTheUser) {
+			accum.logger.Info("order exists and belongs to the user")
+			w.WriteHeader(http.StatusOK)
+			return w, cerrors.ErrDBOrderExistsAndBelongsToTheUser
+		}
+
+		accum.logger.Error("add user", sl.Err(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return w, err
 	}
-	return nil
+	return w, nil
 }
 
 func (accum *Accumulation) GetAllOrders(userID int) ([]model.Accumulation, error) {

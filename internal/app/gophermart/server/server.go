@@ -31,7 +31,7 @@ func (router *Router) Serve() *chi.Mux {
 	authService := service.NewAuth(router.storage, router.logger)
 	apiAuth := api.NewAuth(authService, router.logger)
 
-	accumulationService := service.NewAccumulation(router.storage)
+	accumulationService := service.NewAccumulation(router.storage, router.logger)
 	apiAccumulation := api.NewAccumulation(accumulationService, router.logger)
 
 	router.httpServer.Group(func(r chi.Router) {

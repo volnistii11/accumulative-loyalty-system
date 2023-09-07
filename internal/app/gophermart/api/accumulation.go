@@ -15,7 +15,7 @@ import (
 )
 
 type AccumulationServiceWorker interface {
-	AddOrder(accumulation *model.Accumulation) error
+	AddOrder(w http.ResponseWriter, accumulation *model.Accumulation) (http.ResponseWriter, error)
 	GetAllOrders(userID int) ([]model.Accumulation, error)
 	GetUserBalance(userID int) *model.Balance
 	Withdraw(userID int, withdraw *model.Withdraw) error
@@ -39,7 +39,6 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 		const destination = "api.accumulation.PutOrder"
 		var (
 			err          error
-			orderNumber  string
 			accumulation model.Accumulation
 		)
 
@@ -55,37 +54,12 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		orderNumber = string(body)
-
-		if !luhn.Valid(orderNumber) {
-			logger.Error("order number format is incorrect")
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			render.JSON(w, r, "order number format is incorrect")
-			return
-		}
-
-		accumulation.OrderNumber = orderNumber
+		accumulation.OrderNumber = string(body)
 		accumulation.UserID = getUserIDFromRequest(r)
 
-		err = a.accumulationService.AddOrder(&accumulation)
+		w, err = a.accumulationService.AddOrder(w, &accumulation)
 		if err != nil {
-			if errors.Is(err, cerrors.ErrDBOrderExistsAndDoesNotBelongToTheUser) {
-				logger.Info("order exists and does not belong to the user")
-				w.WriteHeader(http.StatusConflict)
-				render.JSON(w, r, "order exists and does not belong to the user")
-				return
-			}
-
-			if errors.Is(err, cerrors.ErrDBOrderExistsAndBelongsToTheUser) {
-				logger.Info("order exists and belongs to the user")
-				w.WriteHeader(http.StatusOK)
-				render.JSON(w, r, "order exists and belongs to the user")
-				return
-			}
-
-			logger.Error("add user", sl.Err(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, "error when adding user")
+			render.JSON(w, r, err.Error())
 			return
 		}
 
