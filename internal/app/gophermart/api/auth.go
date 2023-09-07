@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/gerr"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
 	"golang.org/x/exp/slog"
@@ -11,7 +10,7 @@ import (
 )
 
 type UserAuthorize interface {
-	RegisterUser(user *model.User) error
+	RegisterUser(w http.ResponseWriter, user *model.User) (http.ResponseWriter, error)
 	AuthenticateUser(user *model.User) (string, error)
 }
 
@@ -44,26 +43,12 @@ func (a *Auth) RegisterUser() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		if user.Login == "" || user.Password == "" {
-			a.logger.Error("wrong request format")
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, "wrong request format")
-			return
-		}
 
-		err = a.authService.RegisterUser(&user)
+		w, err = a.authService.RegisterUser(w, &user)
 		if err != nil {
-			a.logger.Error("failed user register", sl.Err(err))
-			if gerr.IsDuplicateKey(err) {
-				w.WriteHeader(http.StatusConflict)
-				render.JSON(w, r, "user already exist")
-				return
-			}
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, "internal error")
+			render.JSON(w, r, err.Error())
 			return
 		}
-		a.logger.Info("user registered")
 
 		jwtToken, err := a.authService.AuthenticateUser(&user)
 		if err != nil {

@@ -28,7 +28,7 @@ func NewRouter(logger *slog.Logger, storage *database.Storage, cfg config.Parser
 }
 
 func (router *Router) Serve() *chi.Mux {
-	authService := service.NewAuth(router.storage)
+	authService := service.NewAuth(router.storage, router.logger)
 	apiAuth := api.NewAuth(authService, router.logger)
 
 	accumulationService := service.NewAccumulation(router.storage)

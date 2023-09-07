@@ -6,7 +6,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/cerrors"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/gerr"
+	"github.com/volnistii11/accumulative-loyalty-system/internal/lib/sl"
 	"github.com/volnistii11/accumulative-loyalty-system/internal/model"
+	"golang.org/x/exp/slog"
+	"net/http"
 	"time"
 )
 
@@ -22,22 +26,37 @@ type UserAuthorize interface {
 }
 
 type Auth struct {
-	db UserAuthorize
+	db     UserAuthorize
+	logger *slog.Logger
 }
 
-func NewAuth(db UserAuthorize) *Auth {
+func NewAuth(db UserAuthorize, logger *slog.Logger) *Auth {
 	return &Auth{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
-func (a *Auth) RegisterUser(user *model.User) error {
+func (a *Auth) RegisterUser(w http.ResponseWriter, user *model.User) (http.ResponseWriter, error) {
+	if user.Login == "" || user.Password == "" {
+		a.logger.Error("wrong request format")
+		w.WriteHeader(http.StatusBadRequest)
+		return w, cerrors.ErrHTTPWrongRequestFormat
+	}
+
 	user.Password = generatePasswordHash(user.Password)
 	err := a.db.RegisterUser(user)
 	if err != nil {
-		return err
+		a.logger.Error("failed user register", sl.Err(err))
+		if gerr.IsDuplicateKey(err) {
+			w.WriteHeader(http.StatusConflict)
+			return w, cerrors.ErrHTTPUserExists
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		return w, cerrors.ErrInternalServer
 	}
-	return nil
+	a.logger.Info("user registered")
+	return w, nil
 }
 
 func (a *Auth) AuthenticateUser(user *model.User) (string, error) {
