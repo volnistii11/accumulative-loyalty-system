@@ -17,7 +17,10 @@ func SetUpRouter() *chi.Mux {
 }
 
 func SetUpAuthService() *service.Auth {
-	return service.NewAuth(nil)
+	logger := slog.New(
+		slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+	)
+	return service.NewAuth(nil, logger)
 }
 
 func SetUpAPIAuth(authService *service.Auth) *Auth {
