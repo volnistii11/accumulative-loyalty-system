@@ -162,7 +162,6 @@ func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 			render.JSON(w, r, "failed to decode request")
 			return
 		}
-		userID := getUserIDFromRequest(r)
 
 		if !luhn.Valid(withdraw.OrderNumber) {
 			logger.Error("order number format is incorrect")
@@ -171,6 +170,7 @@ func (a *Accumulation) DoWithdraw() http.HandlerFunc {
 			return
 		}
 
+		userID := getUserIDFromRequest(r)
 		err := a.accumulationService.Withdraw(userID, &withdraw)
 		if err != nil {
 			if errors.Is(err, cerrors.ErrDBNotEnoughCoins) {
