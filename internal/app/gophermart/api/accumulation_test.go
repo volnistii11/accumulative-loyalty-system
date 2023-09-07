@@ -14,7 +14,10 @@ import (
 )
 
 func SetUpAccumulationService() *service.Accumulation {
-	return service.NewAccumulation(nil)
+	logger := slog.New(
+		slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+	)
+	return service.NewAccumulation(nil, logger)
 }
 
 func SetUpAPIAccumulation(accumService *service.Accumulation) *Accumulation {
