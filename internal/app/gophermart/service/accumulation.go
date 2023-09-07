@@ -64,12 +64,25 @@ func (accum *Accumulation) AddOrder(w http.ResponseWriter, accumulation *model.A
 	return w, nil
 }
 
-func (accum *Accumulation) GetAllOrders(userID int) ([]model.Accumulation, error) {
+func (accum *Accumulation) GetAllOrders(w http.ResponseWriter, userID int) (http.ResponseWriter, []model.Accumulation, error) {
 	orders, err := accum.db.GetAllOrders(userID)
 	if err != nil {
-		return nil, err
+		accum.logger.Error("get all orders", sl.Err(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return w, nil, err
 	}
-	return orders, nil
+
+	if len(orders) == 0 {
+		accum.logger.Info("user have not order numbers")
+		w.WriteHeader(http.StatusNoContent)
+		return w, nil, cerrors.ErrHTTPStatusNoContent
+	}
+
+	accum.logger.Info("Order items:", orders)
+	w.Header().Add("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	return w, orders, nil
 }
 
 func (accum *Accumulation) GetUserBalance(userID int) *model.Balance {

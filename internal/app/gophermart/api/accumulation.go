@@ -16,7 +16,7 @@ import (
 
 type AccumulationServiceWorker interface {
 	AddOrder(w http.ResponseWriter, accumulation *model.Accumulation) (http.ResponseWriter, error)
-	GetAllOrders(userID int) ([]model.Accumulation, error)
+	GetAllOrders(w http.ResponseWriter, userID int) (http.ResponseWriter, []model.Accumulation, error)
 	GetUserBalance(userID int) *model.Balance
 	Withdraw(userID int, withdraw *model.Withdraw) error
 	GetAllUserWithdrawals(userID int) *model.Withdrawals
@@ -71,32 +71,13 @@ func (a *Accumulation) PutOrder() http.HandlerFunc {
 
 func (a *Accumulation) GetAllOrders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const destination = "api.accumulation.GetAllOrders"
-
-		logger := a.logger.With(
-			slog.String("destination", destination),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
-
 		userID := getUserIDFromRequest(r)
-		orders, err := a.accumulationService.GetAllOrders(userID)
+		w, orders, err := a.accumulationService.GetAllOrders(w, userID)
 		if err != nil {
-			logger.Error("get all orders", sl.Err(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, "error when getting all order numbers")
+			render.JSON(w, r, err.Error())
 			return
 		}
 
-		if len(orders) == 0 {
-			logger.Info("user have not order numbers")
-			w.WriteHeader(http.StatusNoContent)
-			render.JSON(w, r, "user have not order numbers")
-			return
-		}
-
-		logger.Info("Order items:", orders)
-		w.Header().Add("content-type", "application/json")
-		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, orders)
 	}
 }
