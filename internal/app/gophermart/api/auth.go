@@ -11,7 +11,7 @@ import (
 
 type UserAuthorize interface {
 	RegisterUser(w http.ResponseWriter, user *model.User) (http.ResponseWriter, error)
-	AuthenticateUser(user *model.User) (string, error)
+	AuthenticateUser(w http.ResponseWriter, user *model.User) (http.ResponseWriter, error)
 }
 
 type Auth struct {
@@ -50,18 +50,11 @@ func (a *Auth) RegisterUser() http.HandlerFunc {
 			return
 		}
 
-		jwtToken, err := a.authService.AuthenticateUser(&user)
+		w, err = a.authService.AuthenticateUser(w, &user)
 		if err != nil {
-			a.logger.Error("failed user authentication", sl.Err(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, "internal error")
+			render.JSON(w, r, err.Error())
 			return
 		}
-		a.logger.Info("user authenticated")
-
-		cookie := http.Cookie{Name: "jwtToken", Value: jwtToken}
-		http.SetCookie(w, &cookie)
-		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, "you are registered")
 	}
 }

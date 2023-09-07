@@ -59,20 +59,29 @@ func (a *Auth) RegisterUser(w http.ResponseWriter, user *model.User) (http.Respo
 	return w, nil
 }
 
-func (a *Auth) AuthenticateUser(user *model.User) (string, error) {
+func (a *Auth) AuthenticateUser(w http.ResponseWriter, user *model.User) (http.ResponseWriter, error) {
 	user.Password = generatePasswordHash(user.Password)
 
 	user = a.db.GetUser(user)
 	if user.ID == 0 {
-		return "", cerrors.ErrHTTPStatusNoContent
+		a.logger.Error("failed user authentication", sl.Err(cerrors.ErrHTTPStatusNoContent))
+		w.WriteHeader(http.StatusInternalServerError)
+		return w, cerrors.ErrHTTPStatusNoContent
 	}
 
 	jwtToken, err := BuildJWTString(user.ID)
 	if err != nil {
-		return "", errors.Wrap(err, "service.auth.AuthenticateUser.BuildJWT")
+		a.logger.Error("failed user authentication", sl.Err(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return w, errors.Wrap(err, "service.auth.AuthenticateUser.BuildJWT")
 	}
+	a.logger.Info("user authenticated")
 
-	return jwtToken, nil
+	cookie := http.Cookie{Name: "jwtToken", Value: jwtToken}
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusOK)
+
+	return w, nil
 }
 
 type Claims struct {
