@@ -29,6 +29,7 @@ func DoAccrualIfPossible(logger *slog.Logger, storage *database.Storage, cfg con
 				wg.Add(1)
 
 				go func(newOrder string) {
+					defer wg.Done()
 					accrualSystemAddress := fmt.Sprintf("%s%s", cfg.GetAccrualSystemAddress(), "/api/orders/")
 					answer, err := accrualService.SendOrderNumbersToAccrualSystem(newOrder, accrualSystemAddress)
 					if err != nil {
